@@ -1,178 +1,350 @@
 
-import React, { useState } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  Settings2, 
-  Upload, 
-  Music, 
-  Save,
-  Link, 
-  Edit2,
-  Volume2
-} from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { getConfig, updateConfig, uploadAudioFile, ConfigData } from "@/services/api";
+import { Settings, Save, Upload, Plus, Trash2, Music } from "lucide-react";
 
 const Configuration = () => {
-  const [configuration, setConfiguration] = useState({
-    sources: {
-      icci: "https://islamireland.ie/api/timetable/",
-      naas: "https://mawaqit.net/en/m/-34"
-    },
-    defaultTimetable: "icci",
-    timezone: "Europe/Dublin",
-    audioVolume: 40.0,
-    shortAzanFile: "Short_Azan.mp3",
-    fajrAzanFile: "Fajr_Azan.mp3",
-    regularAzanFile: "Regular_Azan.mp3"
-  });
+  const [config, setConfig] = useState<ConfigData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [sourceName, setSourceName] = useState("");
+  const [sourceUrl, setSourceUrl] = useState("");
 
-  const handleConfigUpdate = () => {
-    // Future API call to update configuration
-    console.log("Updating configuration:", configuration);
+  // Fetch configuration
+  useEffect(() => {
+    const fetchConfig = async () => {
+      setLoading(true);
+      try {
+        const configData = await getConfig();
+        setConfig(configData);
+      } catch (error) {
+        console.error("Error fetching configuration:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConfig();
+  }, []);
+
+  // Handle input change
+  const handleInputChange = (key: string, value: string) => {
+    if (!config) return;
+    
+    setConfig(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        [key]: value
+      };
+    });
   };
 
-  return (
-    <div className="space-y-8 p-8 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 min-h-screen">
-      <div className="flex items-center space-x-4 mb-8">
-        <div className="p-3 bg-islamic-green/10 rounded-lg">
-          <Settings2 className="w-8 h-8 text-islamic-green" />
+  // Add new source
+  const handleAddSource = () => {
+    if (!sourceName || !sourceUrl || !config) return;
+    
+    setConfig(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        SOURCES: {
+          ...prev.SOURCES,
+          [sourceName]: sourceUrl
+        }
+      };
+    });
+    
+    setSourceName("");
+    setSourceUrl("");
+    toast.success("Source added");
+  };
+
+  // Remove source
+  const handleRemoveSource = (key: string) => {
+    if (!config) return;
+    
+    setConfig(prev => {
+      if (!prev) return prev;
+      
+      const newSources = { ...prev.SOURCES };
+      delete newSources[key];
+      
+      // If we're removing the default timetable, reset it
+      const newDefaultTimetable = 
+        prev.DEFAULT_TIMETABLE === key && Object.keys(newSources).length > 0
+          ? Object.keys(newSources)[0]
+          : prev.DEFAULT_TIMETABLE;
+      
+      return {
+        ...prev,
+        SOURCES: newSources,
+        DEFAULT_TIMETABLE: newDefaultTimetable
+      };
+    });
+    
+    toast.success("Source removed");
+  };
+
+  // Handle file upload
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>, fileType: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      await uploadAudioFile(file, fileType);
+      
+      // Update the config state with the new filename
+      setConfig(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          [fileType]: file.name
+        };
+      });
+      
+    } catch (error) {
+      console.error("Error uploading file:", error);
+    }
+    
+    // Reset the input
+    e.target.value = '';
+  };
+
+  // Save configuration
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!config) return;
+    
+    setSaving(true);
+    try {
+      await updateConfig(config);
+      toast.success("Configuration saved successfully");
+    } catch (error) {
+      console.error("Error saving configuration:", error);
+      toast.error("Failed to save configuration");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center p-12">
+        <div className="animate-pulse flex flex-col items-center">
+          <Settings className="animate-spin h-10 w-10 text-islamic-green mb-4" />
+          <p>Loading configuration...</p>
         </div>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-islamic-green to-islamic-blue bg-clip-text text-transparent">
-          System Configuration
-        </h1>
       </div>
+    );
+  }
 
-      <div className="grid gap-8 md:grid-cols-2">
-        <Card className="backdrop-blur-sm bg-white/50 dark:bg-slate-800/50 border-none shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-3">
-              <Link className="w-6 h-6 text-islamic-green" />
-              <span>Prayer APIs</span>
+  return (
+    <div className="space-y-6">
+      <form onSubmit={handleSubmit}>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center">
+              <Settings className="mr-2 h-5 w-5 text-islamic-green" />
+              System Configuration
             </CardTitle>
+            <Button type="submit" disabled={saving || !config}>
+              <Save className="mr-2 h-4 w-4" />
+              {saving ? 'Saving...' : 'Save Changes'}
+            </Button>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-4">
-              <div className="group">
-                <Label className="text-sm font-medium text-slate-600 dark:text-slate-300">ICCI Source</Label>
-                <div className="relative">
-                  <Input 
-                    value={configuration.sources.icci}
-                    onChange={(e) => setConfiguration(prev => ({
-                      ...prev, 
-                      sources: { ...prev.sources, icci: e.target.value }
-                    }))}
-                    className="bg-white/70 dark:bg-slate-900/70 border-slate-200 dark:border-slate-700 focus-within:ring-islamic-green"
-                  />
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 group-hover:text-islamic-green transition-colors">
-                    <Link className="w-4 h-4" />
-                  </div>
-                </div>
+          <CardContent className="space-y-8">
+            {/* Basic Settings */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="timezone">Timezone</Label>
+                <Input
+                  id="timezone"
+                  value={config?.TIMEZONE || ""}
+                  onChange={(e) => handleInputChange("TIMEZONE", e.target.value)}
+                  placeholder="Europe/Dublin"
+                />
               </div>
-              <div className="group">
-                <Label className="text-sm font-medium text-slate-600 dark:text-slate-300">Naas Source</Label>
-                <div className="relative">
-                  <Input 
-                    value={configuration.sources.naas}
-                    onChange={(e) => setConfiguration(prev => ({
-                      ...prev, 
-                      sources: { ...prev.sources, naas: e.target.value }
-                    }))}
-                    className="bg-white/70 dark:bg-slate-900/70 border-slate-200 dark:border-slate-700 focus-within:ring-islamic-green"
-                  />
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 group-hover:text-islamic-green transition-colors">
-                    <Link className="w-4 h-4" />
-                  </div>
-                </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="audio_volume">Audio Volume</Label>
+                <Input
+                  id="audio_volume"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  value={config?.AUDIO_VOLUME || "40.0"}
+                  onChange={(e) => handleInputChange("AUDIO_VOLUME", e.target.value)}
+                />
               </div>
             </div>
-            <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
-              <Label className="flex items-center space-x-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-                <Edit2 className="w-4 h-4 text-islamic-green" />
-                <span>Default Timetable</span>
-              </Label>
-              <select 
-                value={configuration.defaultTimetable}
-                onChange={(e) => setConfiguration(prev => ({
-                  ...prev, 
-                  defaultTimetable: e.target.value
-                }))}
-                className="rounded-md border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/70 px-3 py-1 text-sm focus:ring-islamic-green"
-              >
-                <option value="icci">ICCI</option>
-                <option value="naas">Naas</option>
-              </select>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="backdrop-blur-sm bg-white/50 dark:bg-slate-800/50 border-none shadow-xl hover:shadow-2xl transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-3">
-              <Music className="w-6 h-6 text-islamic-green" />
-              <span>Audio Settings</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center justify-between space-x-4 pb-4 border-b border-slate-200 dark:border-slate-700">
-              <Label className="flex items-center space-x-2">
-                <Volume2 className="w-4 h-4 text-islamic-green" />
-                <span>Audio Volume</span>
-              </Label>
-              <Input 
-                type="number"
-                value={configuration.audioVolume}
-                onChange={(e) => setConfiguration(prev => ({
-                  ...prev, 
-                  audioVolume: Number(e.target.value)
-                }))}
-                className="w-24 bg-white/70 dark:bg-slate-900/70 border-slate-200 dark:border-slate-700 focus:ring-islamic-green"
-                min={0}
-                max={100}
-              />
-            </div>
-            <div className="grid gap-4">
-              {[
-                { label: "Short Azan", key: "shortAzanFile", icon: Music },
-                { label: "Fajr Azan", key: "fajrAzanFile", icon: Music },
-                { label: "Regular Azan", key: "regularAzanFile", icon: Music }
-              ].map(({ label, key, icon: Icon }) => (
-                <div key={key} className="group space-y-2">
-                  <Label className="flex items-center space-x-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-                    <Icon className="w-4 h-4 text-islamic-green" />
-                    <span>{label}</span>
-                  </Label>
-                  <div className="flex items-center space-x-2">
-                    <Input 
-                      value={configuration[key]}
-                      readOnly
-                      className="bg-white/70 dark:bg-slate-900/70 border-slate-200 dark:border-slate-700 focus:ring-islamic-green flex-grow"
+            
+            {/* Sources Configuration */}
+            <div>
+              <h3 className="text-lg font-medium mb-4">Prayer Time Sources</h3>
+              
+              <div className="mb-6">
+                <div className="flex items-end gap-4 mb-4">
+                  <div className="flex-1 space-y-2">
+                    <Label htmlFor="source_name">Source Name</Label>
+                    <Input
+                      id="source_name"
+                      value={sourceName}
+                      onChange={(e) => setSourceName(e.target.value)}
+                      placeholder="e.g., dublin"
                     />
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      className="border-slate-200 dark:border-slate-700 hover:bg-islamic-green hover:text-white transition-colors"
-                    >
-                      <Upload className="w-4 h-4" />
-                    </Button>
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <Label htmlFor="source_url">Source URL</Label>
+                    <Input
+                      id="source_url"
+                      value={sourceUrl}
+                      onChange={(e) => setSourceUrl(e.target.value)}
+                      placeholder="https://example.com/api"
+                    />
+                  </div>
+                  <Button 
+                    type="button" 
+                    onClick={handleAddSource}
+                    disabled={!sourceName || !sourceUrl}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add
+                  </Button>
+                </div>
+                
+                <div className="border rounded-md divide-y">
+                  {config && Object.entries(config.SOURCES).map(([key, url]) => (
+                    <div key={key} className="p-3 flex justify-between items-center">
+                      <div>
+                        <h4 className="font-medium">{key}</h4>
+                        <p className="text-sm text-muted-foreground truncate max-w-md">{url}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          className={
+                            config.DEFAULT_TIMETABLE === key 
+                              ? "bg-islamic-green text-white hover:bg-islamic-green/90" 
+                              : ""
+                          }
+                          onClick={() => handleInputChange("DEFAULT_TIMETABLE", key)}
+                          type="button"
+                        >
+                          {config.DEFAULT_TIMETABLE === key ? "Default" : "Set as Default"}
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="destructive" 
+                          type="button"
+                          onClick={() => handleRemoveSource(key)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            {/* Audio Files */}
+            <div>
+              <h3 className="text-lg font-medium mb-4">Audio Files</h3>
+              
+              <div className="grid gap-6 md:grid-cols-3">
+                <div className="space-y-2">
+                  <Label>Short Azan</Label>
+                  <div className="flex items-center justify-between p-2 border rounded-md">
+                    <div className="flex items-center">
+                      <Music className="h-4 w-4 mr-2 text-islamic-green" />
+                      <span className="text-sm truncate max-w-[100px]">
+                        {config?.SHORT_AZAN_FILE || "Not set"}
+                      </span>
+                    </div>
+                    <div>
+                      <Label 
+                        htmlFor="short_azan_upload" 
+                        className="cursor-pointer px-3 py-2 bg-islamic-green text-white rounded-md text-xs flex items-center"
+                      >
+                        <Upload className="h-3 w-3 mr-1" /> Upload
+                      </Label>
+                      <Input
+                        id="short_azan_upload"
+                        type="file"
+                        accept=".mp3"
+                        className="hidden"
+                        onChange={(e) => handleFileUpload(e, "SHORT_AZAN_FILE")}
+                      />
+                    </div>
                   </div>
                 </div>
-              ))}
+                
+                <div className="space-y-2">
+                  <Label>Fajr Azan</Label>
+                  <div className="flex items-center justify-between p-2 border rounded-md">
+                    <div className="flex items-center">
+                      <Music className="h-4 w-4 mr-2 text-islamic-blue" />
+                      <span className="text-sm truncate max-w-[100px]">
+                        {config?.FAJR_AZAN_FILE || "Not set"}
+                      </span>
+                    </div>
+                    <div>
+                      <Label 
+                        htmlFor="fajr_azan_upload" 
+                        className="cursor-pointer px-3 py-2 bg-islamic-blue text-white rounded-md text-xs flex items-center"
+                      >
+                        <Upload className="h-3 w-3 mr-1" /> Upload
+                      </Label>
+                      <Input
+                        id="fajr_azan_upload"
+                        type="file"
+                        accept=".mp3"
+                        className="hidden"
+                        onChange={(e) => handleFileUpload(e, "FAJR_AZAN_FILE")}
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Regular Azan</Label>
+                  <div className="flex items-center justify-between p-2 border rounded-md">
+                    <div className="flex items-center">
+                      <Music className="h-4 w-4 mr-2 text-islamic-gold" />
+                      <span className="text-sm truncate max-w-[100px]">
+                        {config?.REGULAR_AZAN_FILE || "Not set"}
+                      </span>
+                    </div>
+                    <div>
+                      <Label 
+                        htmlFor="regular_azan_upload" 
+                        className="cursor-pointer px-3 py-2 bg-islamic-gold text-white rounded-md text-xs flex items-center"
+                      >
+                        <Upload className="h-3 w-3 mr-1" /> Upload
+                      </Label>
+                      <Input
+                        id="regular_azan_upload"
+                        type="file"
+                        accept=".mp3"
+                        className="hidden"
+                        onChange={(e) => handleFileUpload(e, "REGULAR_AZAN_FILE")}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      <div className="flex justify-end pt-4">
-        <Button 
-          onClick={handleConfigUpdate} 
-          className="bg-islamic-green hover:bg-islamic-green/90 text-white px-6"
-        >
-          <Save className="mr-2 w-5 h-5" />
-          Save Changes
-        </Button>
-      </div>
+      </form>
     </div>
   );
 };
