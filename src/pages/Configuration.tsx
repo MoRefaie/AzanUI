@@ -1,352 +1,156 @@
 
-import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { 
+  Settings, 
+  Upload, 
+  Music, 
+  Save, 
+  CloudUpload, 
+  Edit, 
+  CheckCircle 
+} from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { getConfig, updateConfig, uploadAudioFile, ConfigData } from "@/services/api";
-import { Settings, Save, Upload, Plus, Trash2, Music } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 const Configuration = () => {
-  const [config, setConfig] = useState<ConfigData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [sourceName, setSourceName] = useState("");
-  const [sourceUrl, setSourceUrl] = useState("");
+  const [configuration, setConfiguration] = useState({
+    sources: {
+      icci: "https://islamireland.ie/api/timetable/",
+      naas: "https://mawaqit.net/en/m/-34"
+    },
+    defaultTimetable: "icci",
+    timezone: "Europe/Dublin",
+    audioVolume: 40.0,
+    shortAzanFile: "Short_Azan.mp3",
+    fajrAzanFile: "Fajr_Azan.mp3",
+    regularAzanFile: "Regular_Azan.mp3"
+  });
 
-  // Fetch configuration
-  useEffect(() => {
-    const fetchConfig = async () => {
-      setLoading(true);
-      try {
-        const configData = await getConfig();
-        setConfig(configData);
-      } catch (error) {
-        console.error("Error fetching configuration:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchConfig();
-  }, []);
-
-  // Handle input change
-  const handleInputChange = (key: string, value: string) => {
-    if (!config) return;
-    
-    setConfig(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        [key]: value
-      };
-    });
+  const handleConfigUpdate = () => {
+    // Future API call to update configuration
+    console.log("Updating configuration:", configuration);
   };
-
-  // Add new source
-  const handleAddSource = () => {
-    if (!sourceName || !sourceUrl || !config) return;
-    
-    setConfig(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        SOURCES: {
-          ...prev.SOURCES,
-          [sourceName]: sourceUrl
-        }
-      };
-    });
-    
-    setSourceName("");
-    setSourceUrl("");
-    toast.success("Source added");
-  };
-
-  // Remove source
-  const handleRemoveSource = (key: string) => {
-    if (!config) return;
-    
-    setConfig(prev => {
-      if (!prev) return prev;
-      
-      const newSources = { ...prev.SOURCES };
-      delete newSources[key];
-      
-      // If we're removing the default timetable, reset it
-      const newDefaultTimetable = 
-        prev.DEFAULT_TIMETABLE === key && Object.keys(newSources).length > 0
-          ? Object.keys(newSources)[0]
-          : prev.DEFAULT_TIMETABLE;
-      
-      return {
-        ...prev,
-        SOURCES: newSources,
-        DEFAULT_TIMETABLE: newDefaultTimetable
-      };
-    });
-    
-    toast.success("Source removed");
-  };
-
-  // Handle file upload
-  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>, fileType: string) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      await uploadAudioFile(file, fileType);
-      
-      // Update the config state with the new filename
-      setConfig(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          [fileType]: file.name
-        };
-      });
-      
-    } catch (error) {
-      console.error("Error uploading file:", error);
-    }
-    
-    // Reset the input
-    e.target.value = '';
-  };
-
-  // Save configuration
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!config) return;
-    
-    setSaving(true);
-    try {
-      await updateConfig(config);
-      toast.success("Configuration saved successfully");
-    } catch (error) {
-      console.error("Error saving configuration:", error);
-      toast.error("Failed to save configuration");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center p-12">
-        <div className="animate-pulse flex flex-col items-center">
-          <Settings className="animate-spin h-10 w-10 text-islamic-green mb-4" />
-          <p>Loading configuration...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={handleSubmit}>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center">
-              <Settings className="mr-2 h-5 w-5 text-islamic-green" />
-              System Configuration
-            </CardTitle>
-            <Button type="submit" disabled={saving || !config}>
-              <Save className="mr-2 h-4 w-4" />
-              {saving ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-8">
-            {/* Basic Settings */}
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="timezone">Timezone</Label>
-                <Input
-                  id="timezone"
-                  value={config?.TIMEZONE || ""}
-                  onChange={(e) => handleInputChange("TIMEZONE", e.target.value)}
-                  placeholder="Europe/Dublin"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="audio_volume">Audio Volume</Label>
-                <Input
-                  id="audio_volume"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={config?.AUDIO_VOLUME || "40.0"}
-                  onChange={(e) => handleInputChange("AUDIO_VOLUME", e.target.value)}
-                />
-              </div>
-            </div>
-            
-            {/* Sources Configuration */}
+    <div className="space-y-6 p-6 bg-gradient-to-br from-purple-50 to-purple-100">
+      <div className="flex items-center space-x-4 mb-6">
+        <Settings className="w-10 h-10 text-purple-600" />
+        <h1 className="text-3xl font-bold text-purple-800">Configuration</h1>
+      </div>
+
+      <Card className="hover:shadow-xl transition-shadow duration-300">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Music className="w-6 h-6 text-purple-500" />
+            <span>Prayer Source Settings</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <h3 className="text-lg font-medium mb-4">Prayer Time Sources</h3>
-              
-              <div className="mb-6">
-                <div className="flex items-end gap-4 mb-4">
-                  <div className="flex-1 space-y-2">
-                    <Label htmlFor="source_name">Source Name</Label>
-                    <Input
-                      id="source_name"
-                      value={sourceName}
-                      onChange={(e) => setSourceName(e.target.value)}
-                      placeholder="e.g., dublin"
-                    />
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    <Label htmlFor="source_url">Source URL</Label>
-                    <Input
-                      id="source_url"
-                      value={sourceUrl}
-                      onChange={(e) => setSourceUrl(e.target.value)}
-                      placeholder="https://example.com/api"
-                    />
-                  </div>
-                  <Button 
-                    type="button" 
-                    onClick={handleAddSource}
-                    disabled={!sourceName || !sourceUrl}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add
+              <Label>ICCI Source</Label>
+              <Input 
+                value={configuration.sources.icci}
+                onChange={(e) => setConfiguration(prev => ({
+                  ...prev, 
+                  sources: { ...prev.sources, icci: e.target.value }
+                }))}
+                className="bg-white border-purple-200 focus:ring-purple-300"
+              />
+            </div>
+            <div>
+              <Label>Naas Source</Label>
+              <Input 
+                value={configuration.sources.naas}
+                onChange={(e) => setConfiguration(prev => ({
+                  ...prev, 
+                  sources: { ...prev.sources, naas: e.target.value }
+                }))}
+                className="bg-white border-purple-200 focus:ring-purple-300"
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <Label className="flex items-center space-x-2">
+              <Edit className="w-5 h-5 text-purple-500" />
+              <span>Default Timetable</span>
+            </Label>
+            <select 
+              value={configuration.defaultTimetable}
+              onChange={(e) => setConfiguration(prev => ({
+                ...prev, 
+                defaultTimetable: e.target.value
+              }))}
+              className="rounded-md border border-purple-200 px-2 py-1"
+            >
+              <option value="icci">ICCI</option>
+              <option value="naas">Naas</option>
+            </select>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="hover:shadow-xl transition-shadow duration-300">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <CloudUpload className="w-6 h-6 text-purple-500" />
+            <span>Audio Configuration</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label>Audio Volume</Label>
+            <Input 
+              type="number"
+              value={configuration.audioVolume}
+              onChange={(e) => setConfiguration(prev => ({
+                ...prev, 
+                audioVolume: Number(e.target.value)
+              }))}
+              className="w-24 bg-white border-purple-200 focus:ring-purple-300"
+              min={0}
+              max={100}
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            {[
+              { label: "Short Azan", key: "shortAzanFile" },
+              { label: "Fajr Azan", key: "fajrAzanFile" },
+              { label: "Regular Azan", key: "regularAzanFile" }
+            ].map(({ label, key }) => (
+              <div key={key} className="space-y-2">
+                <Label>{label} File</Label>
+                <div className="flex items-center space-x-2">
+                  <Input 
+                    value={configuration[key]}
+                    readOnly
+                    className="bg-white border-purple-200 flex-grow"
+                  />
+                  <Button variant="outline" size="icon" className="border-purple-300">
+                    <Upload className="w-4 h-4 text-purple-600" />
                   </Button>
                 </div>
-                
-                <div className="border rounded-md divide-y">
-                  {config && Object.entries(config.SOURCES).map(([key, url]) => (
-                    <div key={key} className="p-3 flex justify-between items-center">
-                      <div>
-                        <h4 className="font-medium">{key}</h4>
-                        <p className="text-sm text-muted-foreground truncate max-w-md">{url}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          size="sm"
-                          variant="outline"
-                          className={
-                            config.DEFAULT_TIMETABLE === key 
-                              ? "bg-islamic-green text-white hover:bg-islamic-green/90" 
-                              : ""
-                          }
-                          onClick={() => handleInputChange("DEFAULT_TIMETABLE", key)}
-                          type="button"
-                        >
-                          {config.DEFAULT_TIMETABLE === key ? "Default" : "Set as Default"}
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="destructive" 
-                          type="button"
-                          onClick={() => handleRemoveSource(key)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
-            </div>
-            
-            {/* Audio Files */}
-            <div>
-              <h3 className="text-lg font-medium mb-4">Audio Files</h3>
-              
-              <div className="grid gap-6 md:grid-cols-3">
-                <div className="space-y-2">
-                  <Label>Short Azan</Label>
-                  <div className="flex items-center justify-between p-2 border rounded-md">
-                    <div className="flex items-center">
-                      <Music className="h-4 w-4 mr-2 text-islamic-green" />
-                      <span className="text-sm truncate max-w-[100px]">
-                        {config?.SHORT_AZAN_FILE || "Not set"}
-                      </span>
-                    </div>
-                    <div>
-                      <Label 
-                        htmlFor="short_azan_upload" 
-                        className="cursor-pointer px-3 py-2 bg-islamic-green text-white rounded-md text-xs flex items-center"
-                      >
-                        <Upload className="h-3 w-3 mr-1" /> Upload
-                      </Label>
-                      <Input
-                        id="short_azan_upload"
-                        type="file"
-                        accept=".mp3"
-                        className="hidden"
-                        onChange={(e) => handleFileUpload(e, "SHORT_AZAN_FILE")}
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Fajr Azan</Label>
-                  <div className="flex items-center justify-between p-2 border rounded-md">
-                    <div className="flex items-center">
-                      <Music className="h-4 w-4 mr-2 text-islamic-blue" />
-                      <span className="text-sm truncate max-w-[100px]">
-                        {config?.FAJR_AZAN_FILE || "Not set"}
-                      </span>
-                    </div>
-                    <div>
-                      <Label 
-                        htmlFor="fajr_azan_upload" 
-                        className="cursor-pointer px-3 py-2 bg-islamic-blue text-white rounded-md text-xs flex items-center"
-                      >
-                        <Upload className="h-3 w-3 mr-1" /> Upload
-                      </Label>
-                      <Input
-                        id="fajr_azan_upload"
-                        type="file"
-                        accept=".mp3"
-                        className="hidden"
-                        onChange={(e) => handleFileUpload(e, "FAJR_AZAN_FILE")}
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Regular Azan</Label>
-                  <div className="flex items-center justify-between p-2 border rounded-md">
-                    <div className="flex items-center">
-                      <Music className="h-4 w-4 mr-2 text-islamic-gold" />
-                      <span className="text-sm truncate max-w-[100px]">
-                        {config?.REGULAR_AZAN_FILE || "Not set"}
-                      </span>
-                    </div>
-                    <div>
-                      <Label 
-                        htmlFor="regular_azan_upload" 
-                        className="cursor-pointer px-3 py-2 bg-islamic-gold text-white rounded-md text-xs flex items-center"
-                      >
-                        <Upload className="h-3 w-3 mr-1" /> Upload
-                      </Label>
-                      <Input
-                        id="regular_azan_upload"
-                        type="file"
-                        accept=".mp3"
-                        className="hidden"
-                        onChange={(e) => handleFileUpload(e, "REGULAR_AZAN_FILE")}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </form>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end">
+        <Button 
+          onClick={handleConfigUpdate} 
+          className="bg-purple-600 hover:bg-purple-700 text-white"
+        >
+          <Save className="mr-2 w-5 h-5" />
+          Save Configuration
+        </Button>
+      </div>
     </div>
   );
 };
 
 export default Configuration;
+
