@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,22 +23,17 @@ const Devices = () => {
         setConfig(configData);
         setSelectedDevices(configData.DEVICES || []);
         
-        // Create placeholder devices from the config
-        if (configData.DEVICES && configData.DEVICES.length > 0) {
-          const placeholders = configData.DEVICES.map(id => ({
-            name: `Device (${id})`,
-            address: "Loading...",
-            mac: id.replace(/(.{2})(?=.)/g, '$1:').slice(0, -1),
-            identifier: id,
-            deep_sleep: false,
-            device_info: "Configured device",
-            ready: true,
-            services: [{ protocol: "Unknown", port: 0, credentials: null, requires_password: false, password: null, pairing: "Unknown" }]
-          }));
-          setConfiguredDevices(placeholders);
+        // Initial scan to get real device data
+        const response = await scanDevices();
+        if (response.status === "success" && response.data.devices) {
+          const configuredDevs = response.data.devices.filter(
+            device => configData.DEVICES.includes(device.identifier)
+          );
+          setConfiguredDevices(configuredDevs);
         }
       } catch (error) {
         console.error("Error fetching config:", error);
+        toast.error("Failed to load devices");
       } finally {
         setLoading(false);
       }
@@ -58,16 +52,6 @@ const Devices = () => {
         const newDevices = response.data.devices.filter(
           device => !selectedDevices.includes(device.identifier)
         );
-        
-        // Update the configured devices with real data
-        const updatedConfigured = response.data.devices.filter(
-          device => selectedDevices.includes(device.identifier)
-        );
-        
-        if (updatedConfigured.length > 0) {
-          setConfiguredDevices(updatedConfigured);
-        }
-        
         setDevices(newDevices);
         toast.success("Device scan completed");
       } else {
@@ -134,7 +118,7 @@ const Devices = () => {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="bg-white/90 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center">
             <Monitor className="mr-2 h-5 w-5 text-islamic-green" />
@@ -154,7 +138,11 @@ const Devices = () => {
           {/* Configured Devices Section */}
           <div className="mb-8">
             <h3 className="text-lg font-medium mb-4">Configured Devices</h3>
-            {configuredDevices.length === 0 ? (
+            {loading ? (
+              <div className="flex justify-center p-8">
+                <RefreshCw className="animate-spin h-8 w-8 text-islamic-green" />
+              </div>
+            ) : configuredDevices.length === 0 ? (
               <div className="text-muted-foreground py-4 text-center border rounded-md">
                 No devices configured. Scan for devices to add them.
               </div>
@@ -203,7 +191,7 @@ const Devices = () => {
             )}
           </div>
 
-          {/* Available Devices Section (Scan Results) */}
+          {/* Available Devices Section */}
           <div className="mb-4">
             <h3 className="text-lg font-medium mb-4">Available Devices</h3>
             
