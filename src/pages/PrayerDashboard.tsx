@@ -5,9 +5,11 @@ import { Switch } from "@/components/ui/switch";
 import { 
   getPrayerTimes, 
   getAzanSwitches, 
-  getShortAzanSwitches, 
+  getShortAzanSwitches,
+  getDuaaSwitches,
   updateAzanSwitches, 
   updateShortAzanSwitches,
+  updateDuaaSwitches,
   startScheduler,
   stopScheduler,
   PrayerTimes,
@@ -20,6 +22,7 @@ const PrayerDashboard = () => {
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [azanSwitches, setAzanSwitches] = useState<SwitchStatus | null>(null);
   const [shortAzanSwitches, setShortAzanSwitches] = useState<SwitchStatus | null>(null);
+  const [duaaSwitches, setDuaaSwitches] = useState<SwitchStatus | null>(null);
   const [nextPrayer, setNextPrayer] = useState<string>("");
   const [countdown, setCountdown] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
@@ -28,15 +31,17 @@ const PrayerDashboard = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [timesData, azanData, shortAzanData] = await Promise.all([
+        const [timesData, azanData, shortAzanData, duaaData] = await Promise.all([
           getPrayerTimes(),
           getAzanSwitches(),
-          getShortAzanSwitches()
+          getShortAzanSwitches(),
+          getDuaaSwitches()
         ]);
         
         setPrayerTimes(timesData);
         setAzanSwitches(azanData);
         setShortAzanSwitches(shortAzanData);
+        setDuaaSwitches(duaaData);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -83,12 +88,23 @@ const PrayerDashboard = () => {
     await updateShortAzanSwitches(newSwitches);
   };
 
+  const handleDuaaToggle = async (prayer: string) => {
+    if (!duaaSwitches) return;
+    
+    const newSwitches = { ...duaaSwitches };
+    newSwitches[prayer] = duaaSwitches[prayer] === "On" ? "Off" : "On";
+    
+    setDuaaSwitches(newSwitches);
+    await updateDuaaSwitches(newSwitches);
+  };
+
   const prayersList = prayerTimes ? Object.entries(prayerTimes).map(([prayer, time]) => ({
     name: prayer,
     time,
     isNext: prayer === nextPrayer,
     azanOn: azanSwitches ? azanSwitches[prayer] === "On" : false,
-    shortAzanOn: shortAzanSwitches ? shortAzanSwitches[prayer] === "On" : false
+    shortAzanOn: shortAzanSwitches ? shortAzanSwitches[prayer] === "On" : false,
+    duaaOn: duaaSwitches ? duaaSwitches[prayer] === "On" : false
   })) : [];
 
   return (
@@ -144,6 +160,7 @@ const PrayerDashboard = () => {
                 <th className="px-6 py-4 text-left font-semibold text-islamic-green">Time</th>
                 <th className="px-6 py-4 text-center font-semibold text-islamic-green">Azan</th>
                 <th className="px-6 py-4 text-center font-semibold text-islamic-green">Short Azan</th>
+                <th className="px-6 py-4 text-center font-semibold text-islamic-green">Duaa</th>
               </tr>
             </thead>
             <tbody>
@@ -189,6 +206,15 @@ const PrayerDashboard = () => {
                           checked={shortAzanSwitches?.[prayer] === "On"}
                           onCheckedChange={() => handleShortAzanToggle(prayer)}
                           className="data-[state=checked]:bg-islamic-blue"
+                        />
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-center">
+                        <Switch
+                          checked={duaaSwitches?.[prayer] === "On"}
+                          onCheckedChange={() => handleDuaaToggle(prayer)}
+                          className="data-[state=checked]:bg-islamic-gold"
                         />
                       </div>
                     </td>

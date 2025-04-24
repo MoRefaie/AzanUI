@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 
 // Define base API URL
@@ -346,5 +345,48 @@ export async function uploadAudioFile(file: File, fileType: string): Promise<voi
   } catch (error) {
     console.error(`Failed to upload ${fileType}:`, error);
     toast.error(`Failed to upload ${fileType}`);
+  }
+}
+
+export async function getDuaaSwitches(): Promise<SwitchStatus> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/duaa-switches`);
+    if (!response.ok) {
+      throw new Error(`Error fetching duaa switches: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Failed to fetch duaa switches:", error);
+    toast.error("Failed to fetch duaa switches");
+    // Return mock data for development
+    return {
+      "Fajr": "Off",
+      "Sunrise": "Off",
+      "Dhuhr": "Off",
+      "Asr": "Off",
+      "Maghrib": "Off",
+      "Isha": "Off"
+    };
+  }
+}
+
+export async function updateDuaaSwitches(switches: SwitchStatus): Promise<void> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/update-duaa-switches`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(switches),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error updating duaa switches: ${response.statusText}`);
+    }
+    
+    toast.success("Duaa switches updated successfully");
+  } catch (error) {
+    console.error("Failed to update duaa switches:", error);
+    toast.error("Failed to update duaa switches");
   }
 }
