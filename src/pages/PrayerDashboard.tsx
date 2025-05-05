@@ -14,11 +14,12 @@ import {
   updateDuaaSwitches,
   startScheduler,
   stopScheduler,
+  getSchedulerStatus,
   PrayerTimes,
   SwitchStatus
 } from "@/services/api";
 import { calculateNextPrayer } from "@/utils/timeUtils";
-import { Clock, Volume2, Play, Square, Moon, Sun } from "lucide-react";
+import { Clock, Volume2, Play, Square, Moon, Sun, ToggleLeft, ToggleRight } from "lucide-react";
 import { toast } from "sonner";
 
 const PrayerDashboard = () => {
@@ -30,26 +31,32 @@ const PrayerDashboard = () => {
   const [countdown, setCountdown] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [retryCount, setRetryCount] = useState<number>(0);
+  const [schedulerActive, setSchedulerActive] = useState<boolean>(false);
+  const [schedulerStatusLoading, setSchedulerStatusLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [timesData, azanData, shortAzanData, duaaData] = await Promise.all([
+        const [timesData, azanData, shortAzanData, duaaData, schedulerStatus] = await Promise.all([
           getPrayerTimes(),
           getAzanSwitches(),
           getShortAzanSwitches(),
-          getDuaaSwitches()
+          getDuaaSwitches(),
+          getSchedulerStatus()
         ]);
         
         setPrayerTimes(timesData);
         setAzanSwitches(azanData);
         setShortAzanSwitches(shortAzanData);
         setDuaaSwitches(duaaData);
+        setSchedulerActive(schedulerStatus.active);
+        setSchedulerStatusLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
         // Let's be more graceful with errors, we're already using mock data in the API functions
         toast.error("Using offline data - API server not available");
+        setSchedulerStatusLoading(false);
       } finally {
         setLoading(false);
       }
@@ -114,21 +121,24 @@ const PrayerDashboard = () => {
     await updateDuaaSwitches(newSwitches);
   };
 
-  const handleStartScheduler = async () => {
+  const handleSchedulerToggle = async () => {
     try {
-      await startScheduler();
-      toast.success("Prayer scheduler started");
+      setSchedulerStatusLoading(true);
+      if (schedulerActive) {
+        await stopScheduler();
+        setSchedulerActive(false);
+        toast.success("Prayer scheduler stopped");
+      } else {
+        await startScheduler();
+        setSchedulerActive(true);
+        toast.success("Prayer scheduler started");
+      }
     } catch (error) {
-      toast.error("Failed to start scheduler - API server not available");
-    }
-  };
-
-  const handleStopScheduler = async () => {
-    try {
-      await stopScheduler();
-      toast.success("Prayer scheduler stopped");
-    } catch (error) {
-      toast.error("Failed to stop scheduler - API server not available");
+      toast.error(schedulerActive 
+        ? "Failed to stop scheduler - API server not available" 
+        : "Failed to start scheduler - API server not available");
+    } finally {
+      setSchedulerStatusLoading(false);
     }
   };
 
@@ -238,21 +248,32 @@ const PrayerDashboard = () => {
               </div>
             </div>
             
-            <div className="text-center lg:text-right space-y-3">
-              <Button 
-                onClick={handleStartScheduler}
-                variant="secondary" 
-                className="bg-white/20 hover:bg-white/30 text-white border-white/40 mr-2"
-              >
-                <Play size={18} className="mr-2" /> Start
-              </Button>
-              <Button 
-                onClick={handleStopScheduler}
-                variant="secondary" 
-                className="bg-white/20 hover:bg-white/30 text-white border-white/40"
-              >
-                <Square size={18} className="mr-2" /> Stop
-              </Button>
+            <div className="text-center lg:text-right">
+              <div className="flex flex-col items-center lg:items-end space-y-2">
+                <h2 className="text-2xl font-medium">Scheduler</h2>
+                <div className="flex items-center gap-3">
+                  {schedulerStatusLoading ? (
+                    <Skeleton className="h-8 w-16 bg-white/20" />
+                  ) : (
+                    <Switch
+                      checked={schedulerActive}
+                      onCheckedChange={handleSchedulerToggle}
+                      className="data-[state=checked]:bg-white/30 bg-white/10"
+                    />
+                  )}
+                  <span className="font-medium">
+                    {schedulerStatusLoading 
+                      ? "Loading..." 
+                      : schedulerActive 
+                        ? "Active" 
+                        : "Inactive"}
+                  </span>
+                  {schedulerActive ? 
+                    <ToggleRight className="text-white" size={24} /> : 
+                    <ToggleLeft className="text-white/60" size={24} />
+                  }
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>

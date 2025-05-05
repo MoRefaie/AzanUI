@@ -12,6 +12,12 @@ export interface SwitchStatus {
   [key: string]: string; // e.g., "Fajr": "On"
 }
 
+export interface SchedulerStatus {
+  active: boolean;
+  last_run?: string;
+  next_run?: string;
+}
+
 export interface Device {
   name: string;
   address: string;
@@ -86,7 +92,6 @@ export async function getPrayerTimes(): Promise<PrayerTimes> {
     };
   }
 }
-
 
 export async function getConfig(keys: string[]): Promise<ConfigData> {
   try {
@@ -295,6 +300,32 @@ export async function updateDuaaSwitches(switches: SwitchStatus): Promise<void> 
   }
 }
 
+export async function getSchedulerStatus(): Promise<SchedulerStatus> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/scheduler-status`);
+    if (!response.ok) {
+      throw new Error(`Error fetching scheduler status: ${response.statusText}`);
+    }
+    
+    const jsonResponse = await response.json();
+    
+    if (jsonResponse.status === "success" && jsonResponse.data) {
+      return jsonResponse.data;
+    } else {
+      throw new Error("Invalid response format or missing data field");
+    }
+  } catch (error) {
+    console.error("Failed to fetch scheduler status:", error);
+    // Return mock data for development without showing an error toast
+    // since we're using this in initialization and don't want to show too many errors
+    return {
+      active: false,
+      last_run: "2025-05-05T12:00:00Z",
+      next_run: "2025-05-05T13:27:00Z"
+    };
+  }
+}
+
 export async function startScheduler(): Promise<void> {
   try {
     const response = await fetch(`${API_BASE_URL}/start-scheduler`, {
@@ -320,6 +351,7 @@ export async function startScheduler(): Promise<void> {
   } catch (error) {
     console.error("Failed to start scheduler:", error);
     toast.error("Failed to start scheduler");
+    throw error; // Re-throw to handle in the component
   }
 }
 
@@ -333,13 +365,13 @@ export async function stopScheduler(): Promise<void> {
     });
 
     if (!response.ok) {
-      throw new Error(`Error starting scheduler: ${response.statusText}`);
+      throw new Error(`Error stopping scheduler: ${response.statusText}`);
     }
 
     const jsonResponse = await response.json();
 
     if (jsonResponse.status === "success") {
-      // Only show success message if the scheduler was started successfully
+      // Only show success message if the scheduler was stopped successfully
       toast.success("Prayer scheduler stopped successfully");
     } else if (jsonResponse.status === "error") {
       // Handle specific error messages from the backend
@@ -348,6 +380,7 @@ export async function stopScheduler(): Promise<void> {
   } catch (error) {
     console.error("Failed to stop scheduler:", error);
     toast.error("Failed to stop scheduler");
+    throw error; // Re-throw to handle in the component
   }
 }
 
