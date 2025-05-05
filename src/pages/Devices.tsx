@@ -19,7 +19,7 @@ const Devices = () => {
     const fetchConfig = async () => {
       setLoading(true);
       try {
-        const configData = await getConfig();
+        const configData = await getConfig(["DEVICES"]);
         setConfig(configData);
         setSelectedDevices(configData.DEVICES || []);
         

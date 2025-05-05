@@ -153,6 +153,42 @@ export async function getConfig(keys: string[]): Promise<ConfigData> {
   }
 }
 
+export async function updateConfig(updates: Partial<ConfigData>, returnOutput: boolean = false): Promise<any> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/update-config`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ updates: updates }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error updating configuration: ${response.statusText}`);
+    }
+
+    // Parse the API response
+    const jsonResponse = await response.json();
+
+    if (returnOutput) {
+      // If the switch is "on", return the output
+      return jsonResponse;
+    } else {
+      // If the switch is "off", display a toast notification
+      toast.success("Configuration updated successfully");
+    }
+  } catch (error) {
+    if (returnOutput) {
+      // If the switch is "on", return the output
+      return {"status":"error","error":error};
+    } else {
+      console.error("Failed to update configuration:", error);
+      toast.error("Failed to update configuration");
+      throw error; // Re-throw the error to handle it in the calling function
+    }
+  }
+}
+
 export async function getAzanSwitches(): Promise<SwitchStatus> {
   try {
     const config = await getConfig(["AZAN_SWITCHES"]);
@@ -209,19 +245,16 @@ export async function getDuaaSwitches(): Promise<SwitchStatus> {
 
 export async function updateAzanSwitches(switches: SwitchStatus): Promise<void> {
   try {
-    const response = await fetch(`${API_BASE_URL}/update-azan-switches`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(switches),
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Error updating azan switches: ${response.statusText}`);
-    }
-    
+    // Use updateConfig to send the AZAN_SWITCHES configuration
+    const updateconfig = await updateConfig({ AZAN_SWITCHES: switches }, true);
+    if (updateconfig.status === "error") {
+      console.error("Failed to update azan switches:", updateconfig.error);
+      toast.error("Failed to update azan switches");
+      throw updateconfig.error;
+    } else if (updateconfig.status === "success") {
+    // If the update was successful, show a success message 
     toast.success("Azan switches updated successfully");
+    }
   } catch (error) {
     console.error("Failed to update azan switches:", error);
     toast.error("Failed to update azan switches");
@@ -230,22 +263,35 @@ export async function updateAzanSwitches(switches: SwitchStatus): Promise<void> 
 
 export async function updateShortAzanSwitches(switches: SwitchStatus): Promise<void> {
   try {
-    const response = await fetch(`${API_BASE_URL}/update-short-azan-switches`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(switches),
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Error updating short azan switches: ${response.statusText}`);
-    }
-    
+    const updateconfig = await updateConfig({ SHORT_AZAN_SWITCHES: switches }, true);
+    if (updateconfig.status === "error") {
+      console.error("Failed to update Short azan switches:", updateconfig.error);
+      toast.error("Failed to update Short azan switches");
+      throw updateconfig.error;
+    } else if (updateconfig.status === "success") {
+    // If the update was successful, show a success message 
     toast.success("Short azan switches updated successfully");
+    }
   } catch (error) {
     console.error("Failed to update short azan switches:", error);
     toast.error("Failed to update short azan switches");
+  }
+}
+
+export async function updateDuaaSwitches(switches: SwitchStatus): Promise<void> {
+  try {
+    const updateconfig = await updateConfig({ DUAA_SWITCHES: switches }, true);
+    if (updateconfig.status === "error") {
+      console.error("Failed to update Duaa switches:", updateconfig.error);
+      toast.error("Failed to update Duaa switches");
+      throw updateconfig.error;
+    } else if (updateconfig.status === "success") {
+    // If the update was successful, show a success message 
+    toast.success("Duaa switches updated successfully");
+    }
+  } catch (error) {
+    console.error("Failed to update duaa switches:", error);
+    toast.error("Failed to update duaa switches");
   }
 }
 
@@ -367,27 +413,6 @@ export async function scanDevices(): Promise<DeviceResponse> {
   }
 }
 
-export async function updateConfig(config: Partial<ConfigData>): Promise<void> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/update-config`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(config),
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Error updating configuration: ${response.statusText}`);
-    }
-    
-    toast.success("Configuration updated successfully");
-  } catch (error) {
-    console.error("Failed to update configuration:", error);
-    toast.error("Failed to update configuration");
-  }
-}
-
 export async function uploadAudioFile(file: File, fileType: string): Promise<void> {
   try {
     const formData = new FormData();
@@ -407,26 +432,5 @@ export async function uploadAudioFile(file: File, fileType: string): Promise<voi
   } catch (error) {
     console.error(`Failed to upload ${fileType}:`, error);
     toast.error(`Failed to upload ${fileType}`);
-  }
-}
-
-export async function updateDuaaSwitches(switches: SwitchStatus): Promise<void> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/update-duaa-switches`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(switches),
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Error updating duaa switches: ${response.statusText}`);
-    }
-    
-    toast.success("Duaa switches updated successfully");
-  } catch (error) {
-    console.error("Failed to update duaa switches:", error);
-    toast.error("Failed to update duaa switches");
   }
 }
