@@ -2,9 +2,11 @@ import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { scanDevices, Device, getConfig, updateConfig, ConfigData } from "@/services/api";
-import { Monitor, RefreshCw, Save, Trash2, Plus } from "lucide-react";
+import { Monitor, RefreshCw, Save, Trash2, Plus, Volume2 } from "lucide-react";
 
 const Devices = () => {
   const [devices, setDevices] = useState<Device[]>([]);
@@ -13,15 +15,17 @@ const Devices = () => {
   const [loading, setLoading] = useState(false);
   const [scanLoading, setScanLoading] = useState(false);
   const [config, setConfig] = useState<ConfigData | null>(null);
+  const [audioVolume, setAudioVolume] = useState<string>("40.0");
 
   // Fetch existing config and load configured devices
   useEffect(() => {
     const fetchConfig = async () => {
       setLoading(true);
       try {
-        const configData = await getConfig(["DEVICES"]);
+        const configData = await getConfig(["DEVICES", "AUDIO_VOLUME"]);
         setConfig(configData);
         setSelectedDevices(configData.DEVICES || []);
+        setAudioVolume(configData.AUDIO_VOLUME || "40.0");
         
         // Initial scan to get real device data
         const response = await scanDevices();
@@ -97,6 +101,11 @@ const Devices = () => {
     }
   };
 
+  // Handle audio volume change
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAudioVolume(e.target.value);
+  };
+
   // Submit selected devices
   const handleSubmit = async () => {
     if (!config) return;
@@ -105,7 +114,8 @@ const Devices = () => {
     try {
       await updateConfig({
         ...config,
-        DEVICES: selectedDevices
+        DEVICES: selectedDevices,
+        AUDIO_VOLUME: audioVolume
       });
       toast.success("Device configuration updated");
     } catch (error) {
@@ -135,6 +145,32 @@ const Devices = () => {
           </Button>
         </CardHeader>
         <CardContent>
+          {/* Audio Volume Control */}
+          <div className="mb-8 p-4 border rounded-md">
+            <div className="flex items-center gap-2 mb-4">
+              <Volume2 className="h-5 w-5 text-islamic-green" />
+              <h3 className="text-lg font-medium">Audio Volume</h3>
+            </div>
+            <div className="flex flex-col space-y-2 max-w-md">
+              <Label htmlFor="audio_volume">Volume ({audioVolume}%)</Label>
+              <Input
+                id="audio_volume"
+                type="range"
+                min="0"
+                max="100"
+                step="0.1"
+                value={audioVolume}
+                onChange={handleVolumeChange}
+                className="cursor-pointer"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>0%</span>
+                <span>50%</span>
+                <span>100%</span>
+              </div>
+            </div>
+          </div>
+
           {/* Configured Devices Section */}
           <div className="mb-8">
             <h3 className="text-lg font-medium mb-4">Configured Devices</h3>

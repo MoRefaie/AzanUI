@@ -1,4 +1,3 @@
-
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,7 +30,7 @@ const Configuration = () => {
     const fetchConfig = async () => {
       setLoading(true);
       try {
-        const configData = await getConfig(["TIMEZONE", "AUDIO_VOLUME", "SOURCES", "DEFAULT_TIMETABLE", "SHORT_AZAN_FILE", "FAJR_AZAN_FILE", "REGULAR_AZAN_FILE"]);
+        const configData = await getConfig(["TIMEZONE", "SOURCES", "DEFAULT_TIMETABLE", "SHORT_AZAN_FILE", "FAJR_AZAN_FILE", "REGULAR_AZAN_FILE"]);
         setConfig(configData);
       } catch (error) {
         console.error("Error fetching configuration:", error);
@@ -171,43 +170,28 @@ const Configuration = () => {
           </CardHeader>
           <CardContent className="space-y-8">
             {/* Basic Settings */}
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="timezone">Timezone</Label>
-                <Select 
-                  value={config?.TIMEZONE || "UTC"} 
-                  onValueChange={(value) => handleInputChange("TIMEZONE", value)}
-                >
-                  <SelectTrigger id="timezone" className="w-full">
-                    <SelectValue placeholder="Select a timezone" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[300px] overflow-y-auto">
-                    {Object.entries(groupedTimezones).map(([region, zones]) => (
-                      <SelectGroup key={region}>
-                        <SelectLabel>{region}</SelectLabel>
-                        {zones.map((timezone) => (
-                          <SelectItem key={timezone} value={timezone}>
-                            {timezone}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="audio_volume">Audio Volume</Label>
-                <Input
-                  id="audio_volume"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={config?.AUDIO_VOLUME || "40.0"}
-                  onChange={(e) => handleInputChange("AUDIO_VOLUME", e.target.value)}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="timezone">Timezone</Label>
+              <Select 
+                value={config?.TIMEZONE || "UTC"} 
+                onValueChange={(value) => handleInputChange("TIMEZONE", value)}
+              >
+                <SelectTrigger id="timezone" className="w-full">
+                  <SelectValue placeholder="Select a timezone" />
+                </SelectTrigger>
+                <SelectContent className="max-h-[300px] overflow-y-auto">
+                  {Object.entries(groupedTimezones).map(([region, zones]) => (
+                    <SelectGroup key={region}>
+                      <SelectLabel>{region}</SelectLabel>
+                      {zones.map((timezone) => (
+                        <SelectItem key={timezone} value={timezone}>
+                          {timezone}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             {/* Sources Configuration */}

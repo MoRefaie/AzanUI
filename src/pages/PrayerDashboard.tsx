@@ -248,8 +248,8 @@ const PrayerDashboard = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto px-4">
       <div className="text-center py-8 space-y-4">
-        <h1 className="text-5xl font-bold text-islamic-green tracking-tight">Prayer Times</h1>
-        <p className="text-xl text-islamic-blue/80 font-medium">Dublin, Ireland</p>
+        <h1 className="text-5xl font-bold text-islamic-green tracking-tight drop-shadow-md">Prayer Times</h1>
+        <p className="text-2xl text-islamic-blue/90 font-medium">Dublin, Ireland</p>
       </div>
 
       <Card className="bg-gradient-to-br from-islamic-green to-islamic-blue text-white overflow-hidden">
@@ -295,14 +295,14 @@ const PrayerDashboard = () => {
                       {schedulerStatusLoading 
                         ? "Loading..." 
                         : schedulerActive 
-                          ? "Active" 
-                          : "Inactive"}
+                          ? "On" 
+                          : "Off"}
                     </span>
                   </div>
                 </div>
                 
                 <div className="flex flex-col items-center lg:items-end space-y-2">
-                  <h2 className="text-2xl font-medium">Gama Mode</h2>
+                  <h2 className="text-2xl font-medium">Isha Gama</h2>
                   <div className="flex items-center gap-3">
                     {gamaStatusLoading ? (
                       <Skeleton className="h-8 w-16 bg-white/20" />
@@ -317,8 +317,8 @@ const PrayerDashboard = () => {
                       {gamaStatusLoading 
                         ? "Loading..." 
                         : gamaActive 
-                          ? "Active" 
-                          : "Inactive"}
+                          ? "On" 
+                          : "Off"}
                     </span>
                   </div>
                 </div>
