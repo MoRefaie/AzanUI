@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 
 // Define base API URL
-const API_BASE_URL = "http://localhost:3001"; // Change this to your actual API URL
+const API_BASE_URL = "http://localhost:8000/api"; // Change this to your actual API URL
 
 // Types for the API responses
 export interface PrayerTimes {
@@ -49,6 +49,9 @@ export interface ConfigData {
   FAJR_AZAN_FILE: string;
   REGULAR_AZAN_FILE: string;
   DEVICES: string[];
+  AZAN_SWITCHES: SwitchStatus;
+  SHORT_AZAN_SWITCHES: SwitchStatus;
+  DUAA_SWITCHES: SwitchStatus;
 }
 
 // API call functions
@@ -58,10 +61,20 @@ export async function getPrayerTimes(): Promise<PrayerTimes> {
     if (!response.ok) {
       throw new Error(`Error fetching prayer times: ${response.statusText}`);
     }
-    return await response.json();
+
+    // Parse the JSON response
+    const jsonResponse = await response.json();
+
+    // Extract the "data" field from the response
+    if (jsonResponse.status === "success" && jsonResponse.data) {
+      return jsonResponse.data;
+    } else {
+      throw new Error("Invalid response format or missing data field");
+    }
   } catch (error) {
     console.error("Failed to fetch prayer times:", error);
     toast.error("Failed to fetch prayer times");
+
     // Return mock data for development
     return {
       "Fajr": "04:46",
@@ -74,23 +87,85 @@ export async function getPrayerTimes(): Promise<PrayerTimes> {
   }
 }
 
+
+export async function getConfig(keys: string[]): Promise<ConfigData> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/get-config`,{
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json", // Ensure the request is sent as JSON
+      },
+      body: JSON.stringify({ list: keys }), // Send the keys in the "list" field
+    });
+    if (!response.ok) {
+      throw new Error(`Error fetching configuration: ${response.statusText}`);
+    }
+    // Parse the JSON response
+    const jsonResponse = await response.json();
+
+    // Extract the "data" field from the response
+    if (jsonResponse.status === "success" && jsonResponse.data) {
+      return jsonResponse.data;
+    } else {
+      throw new Error("Invalid response format or missing data field");
+    }
+  } catch (error) {
+    console.error("Failed to fetch configuration:", error);
+    toast.error("Failed to fetch configuration");
+    // Return mock data for development
+    return {
+      "SOURCES": {
+        "icci": "https://islamireland.ie/api/timetable/",
+        "naas": "https://mawaqit.net/en/m/-34"
+      },
+      "DEFAULT_TIMETABLE": "icci",
+      "TIMEZONE": "Europe/Dublin",
+      "AUDIO_VOLUME": "40.0",
+      "SHORT_AZAN_FILE": "Short_Azan.mp3",
+      "FAJR_AZAN_FILE": "Fajr_Azan.mp3",
+      "REGULAR_AZAN_FILE": "Regular_Azan.mp3",
+      "DEVICES": ["024203835863"],
+      "AZAN_SWITCHES": {
+        "Fajr": "On",
+        "Sunrise": "On",
+        "Dhuhr": "On",
+        "Asr": "On",
+        "Maghrib": "On",
+        "Isha": "On"
+      },
+      "SHORT_AZAN_SWITCHES": {
+        "Fajr": "On",
+        "Sunrise": "On",
+        "Dhuhr": "On",
+        "Asr": "On",
+        "Maghrib": "On",
+        "Isha": "On"
+      },
+      "DUAA_SWITCHES": {
+        "Fajr": "On",
+        "Sunrise": "On",
+        "Dhuhr": "On",
+        "Asr": "On",
+        "Maghrib": "On",
+        "Isha": "On"
+      }
+    };
+  }
+}
+
 export async function getAzanSwitches(): Promise<SwitchStatus> {
   try {
-    const response = await fetch(`${API_BASE_URL}/azan-switches`);
-    if (!response.ok) {
-      throw new Error(`Error fetching azan switches: ${response.statusText}`);
-    }
-    return await response.json();
+    const config = await getConfig(["AZAN_SWITCHES"]);
+    return config["AZAN_SWITCHES"];
   } catch (error) {
-    console.error("Failed to fetch azan switches:", error);
-    toast.error("Failed to fetch azan switches");
-    // Return mock data for development
+    console.error("Failed to fetch Azan switches:", error);
+    toast.error("Failed to fetch Azan switches");
     return {
       "Fajr": "Off",
       "Sunrise": "Off",
-      "Dhuhr": "On",
-      "Asr": "On",
-      "Maghrib": "On",
+      "Dhuhr": "Off",
+      "Asr": "Off",
+      "Maghrib": "Off",
       "Isha": "On"
     };
   }
@@ -98,21 +173,35 @@ export async function getAzanSwitches(): Promise<SwitchStatus> {
 
 export async function getShortAzanSwitches(): Promise<SwitchStatus> {
   try {
-    const response = await fetch(`${API_BASE_URL}/short-azan-switches`);
-    if (!response.ok) {
-      throw new Error(`Error fetching short azan switches: ${response.statusText}`);
-    }
-    return await response.json();
+    const config = await getConfig(["SHORT_AZAN_SWITCHES"]);
+    return config["SHORT_AZAN_SWITCHES"];
   } catch (error) {
-    console.error("Failed to fetch short azan switches:", error);
-    toast.error("Failed to fetch short azan switches");
-    // Return mock data for development
+    console.error("Failed to fetch Short Azan switches:", error);
+    toast.error("Failed to fetch Short Azan switches");
     return {
-      "Fajr": "On",
-      "Sunrise": "On",
+      "Fajr": "Off",
+      "Sunrise": "Off",
       "Dhuhr": "Off",
       "Asr": "Off",
-      "Maghrib": "On",
+      "Maghrib": "Off",
+      "Isha": "On"
+    };
+  }
+}
+
+export async function getDuaaSwitches(): Promise<SwitchStatus> {
+  try {
+    const config = await getConfig(["DUAA_SWITCHES"]);
+    return config["DUAA_SWITCHES"];
+  } catch (error) {
+    console.error("Failed to fetch Duaa switches:", error);
+    toast.error("Failed to fetch Duaa switches");
+    return {
+      "Fajr": "Off",
+      "Sunrise": "Off",
+      "Dhuhr": "Off",
+      "Asr": "Off",
+      "Maghrib": "Off",
       "Isha": "On"
     };
   }
@@ -278,33 +367,6 @@ export async function scanDevices(): Promise<DeviceResponse> {
   }
 }
 
-export async function getConfig(): Promise<ConfigData> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/config`);
-    if (!response.ok) {
-      throw new Error(`Error fetching configuration: ${response.statusText}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error("Failed to fetch configuration:", error);
-    toast.error("Failed to fetch configuration");
-    // Return mock data for development
-    return {
-      "SOURCES": {
-        "icci": "https://islamireland.ie/api/timetable/",
-        "naas": "https://mawaqit.net/en/m/-34"
-      },
-      "DEFAULT_TIMETABLE": "icci",
-      "TIMEZONE": "Europe/Dublin",
-      "AUDIO_VOLUME": "40.0",
-      "SHORT_AZAN_FILE": "Short_Azan.mp3",
-      "FAJR_AZAN_FILE": "Fajr_Azan.mp3",
-      "REGULAR_AZAN_FILE": "Regular_Azan.mp3",
-      "DEVICES": ["024203835863"]
-    };
-  }
-}
-
 export async function updateConfig(config: Partial<ConfigData>): Promise<void> {
   try {
     const response = await fetch(`${API_BASE_URL}/update-config`, {
@@ -345,28 +407,6 @@ export async function uploadAudioFile(file: File, fileType: string): Promise<voi
   } catch (error) {
     console.error(`Failed to upload ${fileType}:`, error);
     toast.error(`Failed to upload ${fileType}`);
-  }
-}
-
-export async function getDuaaSwitches(): Promise<SwitchStatus> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/duaa-switches`);
-    if (!response.ok) {
-      throw new Error(`Error fetching duaa switches: ${response.statusText}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error("Failed to fetch duaa switches:", error);
-    toast.error("Failed to fetch duaa switches");
-    // Return mock data for development
-    return {
-      "Fajr": "Off",
-      "Sunrise": "Off",
-      "Dhuhr": "Off",
-      "Asr": "Off",
-      "Maghrib": "Off",
-      "Isha": "Off"
-    };
   }
 }
 
