@@ -319,9 +319,7 @@ export async function getSchedulerStatus(): Promise<SchedulerStatus> {
     // Return mock data for development without showing an error toast
     // since we're using this in initialization and don't want to show too many errors
     return {
-      active: false,
-      last_run: "2025-05-05T12:00:00Z",
-      next_run: "2025-05-05T13:27:00Z"
+      active: false
     };
   }
 }
