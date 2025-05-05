@@ -56,7 +56,7 @@ const PrayerDashboard = () => {
         setShortAzanSwitches(shortAzanData);
         setDuaaSwitches(duaaData);
         setSchedulerActive(schedulerStatus.active);
-        setGamaActive(gamaStatus.active);
+        setGamaActive(gamaStatus);
         setSchedulerStatusLoading(false);
         setGamaStatusLoading(false);
       } catch (error) {
@@ -154,7 +154,7 @@ const PrayerDashboard = () => {
     try {
       setGamaStatusLoading(true);
       const newStatus = !gamaActive;
-      await updateGamaStatus({ active: newStatus });
+      await updateGamaStatus(newStatus);
       setGamaActive(newStatus);
       toast.success(newStatus ? "Gama mode activated" : "Gama mode deactivated");
     } catch (error) {

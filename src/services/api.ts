@@ -63,30 +63,6 @@ export interface ConfigData {
 // Mock data for Gama status
 let mockGamaStatus = { active: false };
 
-/**
- * Gets the current Gama status
- */
-export const getGamaStatus = async (): Promise<{ active: boolean }> => {
-  // In a real implementation, this would fetch from the server
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(mockGamaStatus);
-    }, 500);
-  });
-};
-
-/**
- * Updates the Gama status
- */
-export const updateGamaStatus = async (status: { active: boolean }): Promise<{ active: boolean }> => {
-  // In a real implementation, this would update the server
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      mockGamaStatus = status;
-      resolve(mockGamaStatus);
-    }, 500);
-  });
-};
 
 // API call functions
 export async function getPrayerTimes(): Promise<PrayerTimes> {
@@ -222,6 +198,21 @@ export async function updateConfig(updates: Partial<ConfigData>, returnOutput: b
   }
 }
 
+export async function getGamaStatus(): Promise<boolean> {
+  try {
+    const config = await getConfig(["ISHA_GAMA_SWITCH"]);
+    const status = config["ISHA_GAMA_SWITCH"];
+
+    // Return true if "On", false if "Off"
+    return status === "On";
+  } catch (error) {
+    console.error("Failed to fetch Isha Gama switches:", error);
+    toast.error("Failed to fetch Isha Gama switches");
+    // Default to false in case of an error
+    return false;
+  }
+}
+
 export async function getAzanSwitches(): Promise<SwitchStatus> {
   try {
     const config = await getConfig(["AZAN_SWITCHES"]);
@@ -273,6 +264,32 @@ export async function getDuaaSwitches(): Promise<SwitchStatus> {
       "Maghrib": "Off",
       "Isha": "On"
     };
+  }
+}
+
+export async function updateGamaStatus(status: boolean): Promise<{ active: boolean }> {
+  try {
+    // Convert the boolean status to "On" or "Off"
+    const statusValue = status ? "On" : "Off";
+
+    // Use updateConfig to send the ISHA_GAMA_SWITCHES configuration
+    const updateconfig = await updateConfig({ ISHA_GAMA_SWITCH: statusValue }, true);
+
+    if (updateconfig.status === "error") {
+      console.error("Failed to update Isha Gama switch:", updateconfig.error);
+      toast.error("Failed to update Isha Gama switch");
+      throw updateconfig.error;
+    } else if (updateconfig.status === "success") {
+      // If the update was successful, show a success message
+      toast.success("Isha Gama switch updated successfully");
+    }
+
+    // Return the updated status
+    return { active: status };
+  } catch (error) {
+    console.error("Failed to update Isha Gama switch:", error);
+    toast.error("Failed to update Isha Gama switch");
+    throw error;
   }
 }
 
