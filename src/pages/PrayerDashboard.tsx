@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,7 @@ import {
   SwitchStatus
 } from "@/services/api";
 import { calculateNextPrayer } from "@/utils/timeUtils";
-import { Clock, Volume2, Play, Square, Moon, Sun, ToggleLeft, ToggleRight } from "lucide-react";
+import { Clock, Volume2, Play, Square, Moon, Sun } from "lucide-react";
 import { toast } from "sonner";
 
 const PrayerDashboard = () => {
@@ -189,7 +188,7 @@ const PrayerDashboard = () => {
               <Switch
                 checked={azanSwitches?.[prayer] === "On"}
                 onCheckedChange={() => handleAzanToggle(prayer)}
-                className="data-[state=checked]:bg-islamic-green"
+                colorScheme="islamic-green"
               />
             </div>
           </td>
@@ -198,7 +197,7 @@ const PrayerDashboard = () => {
               <Switch
                 checked={shortAzanSwitches?.[prayer] === "On"}
                 onCheckedChange={() => handleShortAzanToggle(prayer)}
-                className="data-[state=checked]:bg-islamic-blue"
+                colorScheme="islamic-blue"
               />
             </div>
           </td>
@@ -207,7 +206,7 @@ const PrayerDashboard = () => {
               <Switch
                 checked={duaaSwitches?.[prayer] === "On"}
                 onCheckedChange={() => handleDuaaToggle(prayer)}
-                className="data-[state=checked]:bg-islamic-gold"
+                colorScheme="islamic-gold"
               />
             </div>
           </td>
@@ -258,7 +257,8 @@ const PrayerDashboard = () => {
                     <Switch
                       checked={schedulerActive}
                       onCheckedChange={handleSchedulerToggle}
-                      className="data-[state=checked]:bg-white/30 bg-white/10"
+                      className="data-[state=unchecked]:bg-red-500/50"
+                      colorScheme="success"
                     />
                   )}
                   <span className="font-medium">
@@ -268,10 +268,6 @@ const PrayerDashboard = () => {
                         ? "Active" 
                         : "Inactive"}
                   </span>
-                  {schedulerActive ? 
-                    <ToggleRight className="text-white" size={24} /> : 
-                    <ToggleLeft className="text-white/60" size={24} />
-                  }
                 </div>
               </div>
             </div>
