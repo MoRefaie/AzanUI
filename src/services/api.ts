@@ -299,13 +299,24 @@ export async function startScheduler(): Promise<void> {
   try {
     const response = await fetch(`${API_BASE_URL}/start-scheduler`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
-    
+
     if (!response.ok) {
       throw new Error(`Error starting scheduler: ${response.statusText}`);
     }
-    
-    toast.success("Scheduler started successfully");
+
+    const jsonResponse = await response.json();
+
+    if (jsonResponse.status === "success") {
+      // Only show success message if the scheduler was started successfully
+      toast.success("Prayer scheduler started successfully");
+    } else if (jsonResponse.status === "error") {
+      // Handle specific error messages from the backend
+      toast.error(jsonResponse.message);
+    }
   } catch (error) {
     console.error("Failed to start scheduler:", error);
     toast.error("Failed to start scheduler");
@@ -316,13 +327,24 @@ export async function stopScheduler(): Promise<void> {
   try {
     const response = await fetch(`${API_BASE_URL}/stop-scheduler`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
-    
+
     if (!response.ok) {
-      throw new Error(`Error stopping scheduler: ${response.statusText}`);
+      throw new Error(`Error starting scheduler: ${response.statusText}`);
     }
-    
-    toast.success("Scheduler stopped successfully");
+
+    const jsonResponse = await response.json();
+
+    if (jsonResponse.status === "success") {
+      // Only show success message if the scheduler was started successfully
+      toast.success("Prayer scheduler stopped successfully");
+    } else if (jsonResponse.status === "error") {
+      // Handle specific error messages from the backend
+      toast.error(jsonResponse.message);
+    }
   } catch (error) {
     console.error("Failed to stop scheduler:", error);
     toast.error("Failed to stop scheduler");
