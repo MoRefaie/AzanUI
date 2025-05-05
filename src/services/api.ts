@@ -60,6 +60,34 @@ export interface ConfigData {
   DUAA_SWITCHES: SwitchStatus;
 }
 
+// Mock data for Gama status
+let mockGamaStatus = { active: false };
+
+/**
+ * Gets the current Gama status
+ */
+export const getGamaStatus = async (): Promise<{ active: boolean }> => {
+  // In a real implementation, this would fetch from the server
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(mockGamaStatus);
+    }, 500);
+  });
+};
+
+/**
+ * Updates the Gama status
+ */
+export const updateGamaStatus = async (status: { active: boolean }): Promise<{ active: boolean }> => {
+  // In a real implementation, this would update the server
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      mockGamaStatus = status;
+      resolve(mockGamaStatus);
+    }, 500);
+  });
+};
+
 // API call functions
 export async function getPrayerTimes(): Promise<PrayerTimes> {
   try {
