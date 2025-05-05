@@ -6,7 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { getConfig, updateConfig, uploadAudioFile, ConfigData } from "@/services/api";
-import { Settings, Save, Upload, Plus, Trash2, Music } from "lucide-react";
+import { Settings, Save, Upload, Plus, Trash2, Music, Search } from "lucide-react";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue,
+  SelectGroup,
+  SelectLabel
+} from "@/components/ui/select";
+import { groupTimezones } from "@/utils/timezoneData";
 
 const Configuration = () => {
   const [config, setConfig] = useState<ConfigData | null>(null);
@@ -14,6 +24,7 @@ const Configuration = () => {
   const [saving, setSaving] = useState(false);
   const [sourceName, setSourceName] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
+  const groupedTimezones = groupTimezones();
 
   // Fetch configuration
   useEffect(() => {
@@ -163,12 +174,26 @@ const Configuration = () => {
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="timezone">Timezone</Label>
-                <Input
-                  id="timezone"
-                  value={config?.TIMEZONE || ""}
-                  onChange={(e) => handleInputChange("TIMEZONE", e.target.value)}
-                  placeholder="Europe/Dublin"
-                />
+                <Select 
+                  value={config?.TIMEZONE || "UTC"} 
+                  onValueChange={(value) => handleInputChange("TIMEZONE", value)}
+                >
+                  <SelectTrigger id="timezone" className="w-full">
+                    <SelectValue placeholder="Select a timezone" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px] overflow-y-auto">
+                    {Object.entries(groupedTimezones).map(([region, zones]) => (
+                      <SelectGroup key={region}>
+                        <SelectLabel>{region}</SelectLabel>
+                        {zones.map((timezone) => (
+                          <SelectItem key={timezone} value={timezone}>
+                            {timezone}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="space-y-2">
