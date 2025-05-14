@@ -1,13 +1,14 @@
 
 import { NavLink } from "react-router-dom";
-import { Clock, Monitor, Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import { Clock, Monitor, Settings, ChevronLeft, ChevronRight, Lock, Unlock } from "lucide-react";
 
 interface SidebarProps {
   isOpen: boolean;
   toggleSidebar: () => void;
+  isLocked: boolean;
 }
 
-const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
+const Sidebar = ({ isOpen, toggleSidebar, isLocked }: SidebarProps) => {
   const navItems = [
     {
       name: "Prayer Dashboard",
@@ -29,7 +30,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   return (
     <div
       className={`bg-sidebar text-sidebar-foreground h-screen flex-shrink-0 ${
-        isOpen ? "w-64" : "w-16"
+        isOpen ? "w-64" : "w-0 lg:w-0"
       } transition-all duration-300 fixed lg:relative z-40`}
     >
       <div className="flex items-center justify-between p-4">
@@ -40,12 +41,25 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
             </h2>
           )}
         </div>
-        <button
-          onClick={toggleSidebar}
-          className="p-1 rounded-full hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-        >
-          {isOpen ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
-        </button>
+        {isOpen && (
+          <button
+            onClick={toggleSidebar}
+            className="p-1 rounded-full hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors flex items-center gap-1"
+            title={isLocked ? "Unlock sidebar" : "Lock sidebar"}
+          >
+            {isLocked ? (
+              <>
+                <Lock size={16} />
+                <ChevronLeft size={18} />
+              </>
+            ) : (
+              <>
+                <Unlock size={16} />
+                <ChevronLeft size={18} />
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       <div className="mt-8 space-y-2 px-3">

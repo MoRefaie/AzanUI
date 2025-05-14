@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,7 @@ import {
 import { calculateNextPrayer } from "@/utils/timeUtils";
 import { Clock, Volume2, Play, Square, Moon, Sun, Calendar } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 const PrayerDashboard = () => {
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
@@ -39,6 +40,7 @@ const PrayerDashboard = () => {
   const [gamaActive, setGamaActive] = useState<boolean>(false);
   const [gamaStatusLoading, setGamaStatusLoading] = useState<boolean>(true);
   const [currentDate, setCurrentDate] = useState<string>("");
+  const [formattedDate, setFormattedDate] = useState<string>("");
 
   const fetchAllData = async () => {
     setLoading(true);
@@ -64,9 +66,20 @@ const PrayerDashboard = () => {
       // Set current date from prayer times API if available
       if (timesData && timesData.date) {
         setCurrentDate(timesData.date);
+        
+        // Format the date as "Wednesday, May 14, 2025"
+        try {
+          const dateObj = parseISO(timesData.date);
+          setFormattedDate(format(dateObj, "EEEE, MMMM d, yyyy"));
+        } catch (error) {
+          // If parsing fails, use the original date
+          setFormattedDate(timesData.date);
+        }
       } else {
         // Fallback to current date
-        setCurrentDate(format(new Date(), "yyyy-MM-dd"));
+        const today = new Date();
+        setCurrentDate(format(today, "yyyy-MM-dd"));
+        setFormattedDate(format(today, "EEEE, MMMM d, yyyy"));
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -75,7 +88,9 @@ const PrayerDashboard = () => {
       setGamaStatusLoading(false);
       
       // Fallback to current date
-      setCurrentDate(format(new Date(), "yyyy-MM-dd"));
+      const today = new Date();
+      setCurrentDate(format(today, "yyyy-MM-dd"));
+      setFormattedDate(format(today, "EEEE, MMMM d, yyyy"));
     } finally {
       setLoading(false);
     }
@@ -197,7 +212,7 @@ const PrayerDashboard = () => {
 
     if (!prayerTimes) return null;
 
-    return Object.entries(prayerTimes).map(([prayer, time]) => {
+    return Object.entries(prayerTimes).filter(([prayer]) => prayer !== 'date').map(([prayer, time]) => {
       const isNext = prayer === nextPrayer;
       const isIshaWithGama = prayer === "Isha" && gamaActive;
       const isAzanOff = azanSwitches?.[prayer] === "Off";
@@ -292,7 +307,7 @@ const PrayerDashboard = () => {
                     </p>
                   )}
                 </div>
-                <p className="text-sm md:text-base mt-1">{currentDate}</p>
+                <p className="text-sm md:text-base mt-1">{formattedDate}</p>
               </div>
             </div>
             

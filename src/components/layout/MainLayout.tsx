@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Sidebar from "./Sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { Moon, Sun } from "lucide-react";
@@ -11,14 +11,19 @@ interface MainLayoutProps {
 }
 
 const MainLayout = ({ children }: MainLayoutProps) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [currentLayout, setCurrentLayout] = useState<string>("auto");
   const isMobile = useIsMobile();
   const [location, setLocation] = useState<string>("Dublin, Ireland");
+  const [isLocked, setIsLocked] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const hoverAreaRef = useRef<HTMLDivElement>(null);
   
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+    setIsLocked(!isLocked);
   };
 
   const toggleDarkMode = () => {
@@ -30,10 +35,59 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     }
   };
 
+  // Handle mouse enter and leave for hover functionality
+  const handleMouseEnter = () => {
+    if (!isLocked) {
+      setIsHovering(true);
+      setIsSidebarOpen(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isLocked) {
+      setIsHovering(false);
+      setIsSidebarOpen(false);
+    }
+  };
+
+  // Close sidebar when clicking outside on mobile
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isMobile && isSidebarOpen && sidebarRef.current && 
+          !sidebarRef.current.contains(event.target as Node)) {
+        setIsSidebarOpen(false);
+        setIsLocked(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMobile, isSidebarOpen]);
+
   return (
     <div className={`min-h-screen flex w-full ${isDarkMode ? 'dark' : ''}`}>
-      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+      <div ref={sidebarRef}>
+        <Sidebar 
+          isOpen={isSidebarOpen} 
+          toggleSidebar={toggleSidebar}
+          isLocked={isLocked}
+        />
+      </div>
+      
+      {/* Hover area on the left edge of the screen */}
+      <div 
+        ref={hoverAreaRef}
+        className="fixed left-0 top-0 h-full w-4 z-30"
+        onMouseEnter={handleMouseEnter}
+        onTouchStart={isMobile ? handleMouseEnter : undefined}
+      />
+      
+      <div 
+        className="flex-1 flex flex-col h-screen overflow-hidden"
+        onMouseLeave={handleMouseLeave}
+      >
         <header className="bg-white dark:bg-gray-800 shadow-md px-4 py-2 flex justify-between items-center">
           <button
             onClick={toggleSidebar}
