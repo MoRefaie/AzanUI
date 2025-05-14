@@ -1,4 +1,3 @@
-
 import { NavLink } from "react-router-dom";
 import { Clock, Monitor, Settings, ChevronLeft, ChevronRight, Lock, Unlock } from "lucide-react";
 
@@ -29,9 +28,9 @@ const Sidebar = ({ isOpen, toggleSidebar, isLocked }: SidebarProps) => {
 
   return (
     <div
-      className={`bg-sidebar text-sidebar-foreground h-screen flex-shrink-0 ${
-        isOpen ? "w-64" : "w-0 lg:w-0"
-      } transition-all duration-300 fixed lg:relative z-40`}
+      className={`bg-sidebar text-sidebar-foreground h-screen flex-shrink-0
+        ${isOpen ? "w-64" : "w-16"}
+        overflow-x-hidden transition-all duration-300 fixed lg:relative z-40`}
     >
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center">
@@ -41,25 +40,25 @@ const Sidebar = ({ isOpen, toggleSidebar, isLocked }: SidebarProps) => {
             </h2>
           )}
         </div>
-        {isOpen && (
-          <button
-            onClick={toggleSidebar}
-            className="p-1 rounded-full hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors flex items-center gap-1"
-            title={isLocked ? "Unlock sidebar" : "Lock sidebar"}
-          >
-            {isLocked ? (
+        <button
+          onClick={toggleSidebar}
+          className="p-1 rounded-full hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors flex items-center gap-1"
+          title={isOpen ? (isLocked ? "Unlock sidebar" : "Lock sidebar") : "Expand sidebar"}
+        >
+          {isOpen ? (
+            isLocked ? (
               <>
-                <Lock size={16} />
                 <ChevronLeft size={18} />
               </>
             ) : (
               <>
-                <Unlock size={16} />
                 <ChevronLeft size={18} />
               </>
-            )}
-          </button>
-        )}
+            )
+          ) : (
+            <ChevronRight size={18} />
+          )}
+        </button>
       </div>
 
       <div className="mt-8 space-y-2 px-3">
