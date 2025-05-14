@@ -58,6 +58,7 @@ export interface ConfigData {
   AZAN_SWITCHES: SwitchStatus;
   SHORT_AZAN_SWITCHES: SwitchStatus;
   DUAA_SWITCHES: SwitchStatus;
+  ISHA_GAMA_SWITCH?: string; // Adding the missing property with optional flag
 }
 
 // Mock data for Gama status
@@ -273,7 +274,7 @@ export async function updateGamaStatus(status: boolean): Promise<{ active: boole
     const statusValue = status ? "On" : "Off";
 
     // Use updateConfig to send the ISHA_GAMA_SWITCHES configuration
-    const updateconfig = await updateConfig({ ISHA_GAMA_SWITCH: statusValue }, true);
+    const updateconfig = await updateConfig({ ISHA_GAMA_SWITCH: statusValue } as Partial<ConfigData>, true);
 
     if (updateconfig.status === "error") {
       console.error("Failed to update Isha Gama switch:", updateconfig.error);
