@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -283,7 +282,7 @@ const PrayerDashboard = () => {
             
             <div className="text-center">
               <div className="flex flex-col items-center">
-                <h2 className="text-lg md:text-xl font-medium mb-1">Remaining Time</h2>
+                <h2 className="text-lg md:text-xl font-medium mb-1">Time Remaining</h2>
                 <div className="bg-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3 inline-block min-w-[140px] md:min-w-[180px]">
                   {loading && !countdown ? (
                     <Skeleton className="h-7 md:h-8 w-24 md:w-28 bg-white/20" />
