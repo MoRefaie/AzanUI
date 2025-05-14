@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,8 +21,9 @@ import {
   SwitchStatus
 } from "@/services/api";
 import { calculateNextPrayer } from "@/utils/timeUtils";
-import { Clock, Volume2, Play, Square, Moon, Sun } from "lucide-react";
+import { Clock, Volume2, Play, Square, Moon, Sun, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 const PrayerDashboard = () => {
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
@@ -30,46 +32,53 @@ const PrayerDashboard = () => {
   const [duaaSwitches, setDuaaSwitches] = useState<SwitchStatus | null>(null);
   const [nextPrayer, setNextPrayer] = useState<string>("");
   const [countdown, setCountdown] = useState<string>("");
+  const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [retryCount, setRetryCount] = useState<number>(0);
   const [schedulerActive, setSchedulerActive] = useState<boolean>(false);
   const [schedulerStatusLoading, setSchedulerStatusLoading] = useState<boolean>(true);
   const [gamaActive, setGamaActive] = useState<boolean>(false);
   const [gamaStatusLoading, setGamaStatusLoading] = useState<boolean>(true);
+  const [currentDate, setCurrentDate] = useState<string>("");
+
+  const fetchAllData = async () => {
+    setLoading(true);
+    try {
+      const [timesData, azanData, shortAzanData, duaaData, schedulerStatus, gamaStatus] = await Promise.all([
+        getPrayerTimes(),
+        getAzanSwitches(),
+        getShortAzanSwitches(),
+        getDuaaSwitches(),
+        getSchedulerStatus(),
+        getGamaStatus()
+      ]);
+      
+      setPrayerTimes(timesData);
+      setAzanSwitches(azanData);
+      setShortAzanSwitches(shortAzanData);
+      setDuaaSwitches(duaaData);
+      setSchedulerActive(schedulerStatus.active);
+      setGamaActive(gamaStatus);
+      setSchedulerStatusLoading(false);
+      setGamaStatusLoading(false);
+      
+      // Set current date
+      setCurrentDate(format(new Date(), "EEEE, MMMM d, yyyy"));
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast.error("Using offline data - API server not available");
+      setSchedulerStatusLoading(false);
+      setGamaStatusLoading(false);
+      
+      // Set current date even if API fails
+      setCurrentDate(format(new Date(), "EEEE, MMMM d, yyyy"));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [timesData, azanData, shortAzanData, duaaData, schedulerStatus, gamaStatus] = await Promise.all([
-          getPrayerTimes(),
-          getAzanSwitches(),
-          getShortAzanSwitches(),
-          getDuaaSwitches(),
-          getSchedulerStatus(),
-          getGamaStatus()
-        ]);
-        
-        setPrayerTimes(timesData);
-        setAzanSwitches(azanData);
-        setShortAzanSwitches(shortAzanData);
-        setDuaaSwitches(duaaData);
-        setSchedulerActive(schedulerStatus.active);
-        setGamaActive(gamaStatus);
-        setSchedulerStatusLoading(false);
-        setGamaStatusLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        // Let's be more graceful with errors, we're already using mock data in the API functions
-        toast.error("Using offline data - API server not available");
-        setSchedulerStatusLoading(false);
-        setGamaStatusLoading(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    fetchAllData();
     
     // If we're in a Lovable environment, we'll retry every 20 seconds up to 3 times
     // This is useful for development if the API server comes online later
@@ -86,9 +95,15 @@ const PrayerDashboard = () => {
     if (!prayerTimes) return;
 
     const updateCountdown = () => {
-      const { nextPrayer: next, countdown: time } = calculateNextPrayer(prayerTimes);
+      const { nextPrayer: next, countdown: time, timeRemaining: remaining } = calculateNextPrayer(prayerTimes);
       setNextPrayer(next);
       setCountdown(time);
+      setTimeRemaining(remaining);
+
+      // If countdown reaches zero, refresh data
+      if (remaining <= 1000) {
+        fetchAllData();
+      }
     };
 
     updateCountdown();
@@ -155,9 +170,9 @@ const PrayerDashboard = () => {
       const newStatus = !gamaActive;
       await updateGamaStatus(newStatus);
       setGamaActive(newStatus);
-      toast.success(newStatus ? "Gama mode activated" : "Gama mode deactivated");
+      toast.success(newStatus ? "Isha Gama On" : "Isha Gama Off");
     } catch (error) {
-      toast.error("Failed to update Gama mode - API server not available");
+      toast.error("Failed to update Isha Gama - API server not available");
     } finally {
       setGamaStatusLoading(false);
     }
@@ -167,11 +182,11 @@ const PrayerDashboard = () => {
     if (loading && !prayerTimes) {
       return Array(6).fill(0).map((_, index) => (
         <tr key={`skeleton-${index}`} className="border-b border-islamic-green/10">
-          <td className="px-3 md:px-6 py-4"><Skeleton className="h-6 w-20 md:w-32" /></td>
-          <td className="px-3 md:px-6 py-4"><Skeleton className="h-6 w-12 md:w-16" /></td>
-          <td className="px-3 md:px-6 py-4"><div className="flex justify-center"><Skeleton className="h-6 w-8 md:w-10 rounded-full" /></div></td>
-          <td className="px-3 md:px-6 py-4"><div className="flex justify-center"><Skeleton className="h-6 w-8 md:w-10 rounded-full" /></div></td>
-          <td className="px-3 md:px-6 py-4"><div className="flex justify-center"><Skeleton className="h-6 w-8 md:w-10 rounded-full" /></div></td>
+          <td className="px-3 md:px-6 py-3"><Skeleton className="h-6 w-20 md:w-32" /></td>
+          <td className="px-3 md:px-6 py-3"><Skeleton className="h-6 w-12 md:w-16" /></td>
+          <td className="px-3 md:px-6 py-3"><div className="flex justify-center"><Skeleton className="h-6 w-8 md:w-10 rounded-full" /></div></td>
+          <td className="px-3 md:px-6 py-3"><div className="flex justify-center"><Skeleton className="h-6 w-8 md:w-10 rounded-full" /></div></td>
+          <td className="px-3 md:px-6 py-3"><div className="flex justify-center"><Skeleton className="h-6 w-8 md:w-10 rounded-full" /></div></td>
         </tr>
       ));
     }
@@ -190,8 +205,8 @@ const PrayerDashboard = () => {
           className={`border-b border-islamic-green/10 transition-colors
             ${isNext ? 'bg-islamic-beige/30' : 'hover:bg-islamic-beige/20'}`}
         >
-          <td className="px-3 md:px-6 py-3 md:py-4">
-            <div className="flex items-center gap-2 md:gap-3">
+          <td className="px-2 md:px-4 py-2 md:py-3">
+            <div className="flex items-center gap-1 md:gap-2">
               {prayer === "Fajr" && <Moon className="text-islamic-blue" size={16} />}
               {prayer === "Sunrise" && <Sun className="text-islamic-gold" size={16} />}
               {prayer === "Dhuhr" && <Sun className="text-islamic-gold" size={16} />}
@@ -206,39 +221,39 @@ const PrayerDashboard = () => {
               )}
             </div>
           </td>
-          <td className="px-3 md:px-6 py-3 md:py-4 font-mono text-sm md:text-base">
+          <td className="px-2 md:px-4 py-2 md:py-3 font-mono text-sm md:text-base">
             {time}
           </td>
-          <td className="px-1 md:px-6 py-3 md:py-4">
+          <td className="px-1 md:px-3 py-2 md:py-3">
             <div className="flex justify-center">
               <Switch
                 checked={azanSwitches?.[prayer] === "On"}
                 onCheckedChange={() => handleAzanToggle(prayer)}
                 colorScheme="islamic-green"
                 disabled={isIshaWithGama}
-                className="scale-75 md:scale-100"
+                className="scale-75 md:scale-90"
               />
             </div>
           </td>
-          <td className="px-1 md:px-6 py-3 md:py-4">
+          <td className="px-1 md:px-3 py-2 md:py-3">
             <div className="flex justify-center">
               <Switch
                 checked={shortAzanSwitches?.[prayer] === "On"}
                 onCheckedChange={() => handleShortAzanToggle(prayer)}
                 colorScheme="islamic-blue"
                 disabled={isDisabled}
-                className="scale-75 md:scale-100"
+                className="scale-75 md:scale-90"
               />
             </div>
           </td>
-          <td className="px-1 md:px-6 py-3 md:py-4">
+          <td className="px-1 md:px-3 py-2 md:py-3">
             <div className="flex justify-center">
               <Switch
                 checked={duaaSwitches?.[prayer] === "On"}
                 onCheckedChange={() => handleDuaaToggle(prayer)}
                 colorScheme="islamic-gold"
                 disabled={isDisabled}
-                className="scale-75 md:scale-100"
+                className="scale-75 md:scale-90"
               />
             </div>
           </td>
@@ -248,44 +263,46 @@ const PrayerDashboard = () => {
   };
 
   return (
-    <div className="space-y-4 md:space-y-6 max-w-full lg:max-w-7xl mx-auto px-2 md:px-4">
-      <Card className="bg-gradient-to-br from-islamic-green to-islamic-blue text-white overflow-hidden mt-2 md:mt-6">
-        <CardContent className="p-4 md:p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 items-center">
+    <div className="space-y-3 md:space-y-4 max-w-full lg:max-w-7xl mx-auto px-2 md:px-4">
+      <Card className="bg-gradient-to-br from-islamic-green to-islamic-blue text-white overflow-hidden mt-2 md:mt-4">
+        <CardContent className="p-3 md:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 items-center">
             <div className="text-center lg:text-left">
-              <h2 className="text-xl md:text-2xl font-medium mb-1 md:mb-2">Next Prayer</h2>
+              <h2 className="text-lg md:text-xl font-medium mb-1">Next Prayer</h2>
               {loading && !nextPrayer ? (
-                <Skeleton className="h-8 md:h-10 w-24 md:w-32 bg-white/20 mx-auto lg:mx-0" />
+                <Skeleton className="h-8 md:h-9 w-24 md:w-28 bg-white/20 mx-auto lg:mx-0" />
               ) : (
-                <div className="text-2xl md:text-4xl font-bold">{nextPrayer || "Loading..."}</div>
+                <div className="text-xl md:text-3xl font-bold">{nextPrayer || "Loading..."}</div>
               )}
             </div>
             
             <div className="text-center">
-              <h2 className="text-xl md:text-2xl font-medium mb-1 md:mb-2">Time Remaining</h2>
-              <div className="bg-white/20 rounded-lg px-3 md:px-6 py-2 md:py-4 inline-block min-w-[140px] md:min-w-[200px]">
-                {loading && !countdown ? (
-                  <Skeleton className="h-8 md:h-10 w-24 md:w-32 bg-white/20" />
-                ) : (
-                  <p className="font-mono text-2xl md:text-4xl font-bold tabular-nums">
-                    {countdown || "00:00:00"}
-                  </p>
-                )}
+              <div className="flex flex-col items-center">
+                <h2 className="text-lg md:text-xl font-medium mb-1">{currentDate}</h2>
+                <div className="bg-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3 inline-block min-w-[140px] md:min-w-[180px]">
+                  {loading && !countdown ? (
+                    <Skeleton className="h-7 md:h-8 w-24 md:w-28 bg-white/20" />
+                  ) : (
+                    <p className="font-mono text-xl md:text-3xl font-bold tabular-nums">
+                      {countdown || "00:00:00"}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
             
             <div className="text-center lg:text-right md:col-span-2 lg:col-span-1">
-              <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
-                <div className="flex flex-col items-center lg:items-end space-y-1 md:space-y-2">
-                  <h2 className="text-xl md:text-2xl font-medium">Scheduler</h2>
-                  <div className="flex items-center gap-2 md:gap-3">
+              <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
+                <div className="flex flex-col items-center lg:items-end space-y-1">
+                  <h2 className="text-lg md:text-xl font-medium">Scheduler</h2>
+                  <div className="flex items-center gap-2">
                     {schedulerStatusLoading ? (
-                      <Skeleton className="h-6 md:h-8 w-12 md:w-16 bg-white/20" />
+                      <Skeleton className="h-6 w-12 bg-white/20" />
                     ) : (
                       <Switch
                         checked={schedulerActive}
                         onCheckedChange={handleSchedulerToggle}
-                        className={`${schedulerActive ? 'bg-green-500' : 'bg-red-500'} data-[state=unchecked]:bg-red-500 scale-75 md:scale-100`}
+                        className={`${schedulerActive ? 'bg-green-500' : 'bg-red-500'} data-[state=unchecked]:bg-red-500 scale-75 md:scale-90`}
                       />
                     )}
                     <span className="font-medium text-sm md:text-base">
@@ -298,16 +315,16 @@ const PrayerDashboard = () => {
                   </div>
                 </div>
                 
-                <div className="flex flex-col items-center lg:items-end space-y-1 md:space-y-2">
-                  <h2 className="text-xl md:text-2xl font-medium">Isha Gama</h2>
-                  <div className="flex items-center gap-2 md:gap-3">
+                <div className="flex flex-col items-center lg:items-end space-y-1">
+                  <h2 className="text-lg md:text-xl font-medium">Isha Gama</h2>
+                  <div className="flex items-center gap-2">
                     {gamaStatusLoading ? (
-                      <Skeleton className="h-6 md:h-8 w-12 md:w-16 bg-white/20" />
+                      <Skeleton className="h-6 w-12 bg-white/20" />
                     ) : (
                       <Switch
                         checked={gamaActive}
                         onCheckedChange={handleGamaToggle}
-                        className={`${gamaActive ? 'bg-green-500' : 'bg-red-500'} data-[state=unchecked]:bg-red-500 scale-75 md:scale-100`}
+                        className={`${gamaActive ? 'bg-green-500' : 'bg-red-500'} data-[state=unchecked]:bg-red-500 scale-75 md:scale-90`}
                       />
                     )}
                     <span className="font-medium text-sm md:text-base">
@@ -327,17 +344,17 @@ const PrayerDashboard = () => {
 
       <Card className="overflow-hidden border-islamic-green/20 shadow-lg">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm md:text-base">
+          <table className="w-full text-xs sm:text-sm md:text-base">
             <thead>
               <tr className="bg-islamic-beige/50">
-                <th className="px-3 md:px-6 py-4 md:py-5 text-left font-semibold text-islamic-green text-base md:text-lg">Prayer</th>
-                <th className="px-3 md:px-6 py-4 md:py-5 text-left font-semibold text-islamic-green text-base md:text-lg">Time</th>
-                <th className="px-3 md:px-6 py-4 md:py-5 text-center font-semibold text-islamic-green text-base md:text-lg">Azan</th>
-                <th className="px-2 md:px-6 py-4 md:py-5 text-center font-semibold text-islamic-green text-base md:text-lg">
+                <th className="px-2 md:px-4 py-3 text-left font-semibold text-islamic-green text-sm md:text-base">Prayer</th>
+                <th className="px-2 md:px-4 py-3 text-left font-semibold text-islamic-green text-sm md:text-base">Time</th>
+                <th className="px-2 md:px-4 py-3 text-center font-semibold text-islamic-green text-sm md:text-base">Azan</th>
+                <th className="px-2 md:px-4 py-3 text-center font-semibold text-islamic-green text-sm md:text-base">
                   <span className="hidden md:inline">Short Azan</span>
                   <span className="md:hidden">Short</span>
                 </th>
-                <th className="px-3 md:px-6 py-4 md:py-5 text-center font-semibold text-islamic-green text-base md:text-lg">Duaa</th>
+                <th className="px-2 md:px-4 py-3 text-center font-semibold text-islamic-green text-sm md:text-base">Duaa</th>
               </tr>
             </thead>
             <tbody>
