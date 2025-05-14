@@ -34,11 +34,16 @@ const Sidebar = ({ isOpen, toggleSidebar, isLocked }: SidebarProps) => {
     >
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center">
-          {isOpen && (
-            <h2 className="font-semibold ml-2 text-sidebar-foreground">
-              Admin Panel
-            </h2>
-          )}
+          <h2
+            className={`
+              sidebar-inline font-semibold ml-2 text-sidebar-foreground
+              whitespace-nowrap overflow-hidden
+              transition-all duration-300
+              ${isOpen ? "w-32 opacity-100" : "w-0 opacity-0"}
+            `}
+          >
+            Admin Panel
+          </h2>
         </div>
         <button
           onClick={toggleSidebar}
@@ -71,12 +76,23 @@ const Sidebar = ({ isOpen, toggleSidebar, isLocked }: SidebarProps) => {
                 isActive
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
                   : "hover:bg-sidebar-accent/50"
-              } ${!isOpen && "justify-center"}`
+              }`
             }
           >
             <div className="flex items-center">
               {item.icon}
-              {isOpen && <span className="ml-3">{item.name}</span>}
+              <span
+                className={`
+                  sidebar-inline
+                  ml-3
+                  whitespace-nowrap
+                  overflow-hidden
+                  transition-all duration-300
+                  ${isOpen ? "w-32 opacity-100" : "w-0 opacity-0"}
+                `}
+              >
+                {item.name}
+              </span>
             </div>
           </NavLink>
         ))}

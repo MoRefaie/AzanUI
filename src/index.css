@@ -112,3 +112,10 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: #1D644F60;
 }
+
+/* Sidebar styles */
+.sidebar-inline {
+  display: inline-block;
+  transition-property: width, opacity;
+  vertical-align: middle;
+}
