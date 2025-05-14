@@ -88,6 +88,7 @@ export async function getPrayerTimes(): Promise<PrayerTimes> {
 
     // Return mock data for development
     return {
+      "date": "2023-10-01",
       "Fajr": "04:46",
       "Sunrise": "06:27",
       "Dhuhr": "13:27",
