@@ -62,16 +62,21 @@ const PrayerDashboard = () => {
       setSchedulerStatusLoading(false);
       setGamaStatusLoading(false);
       
-      // Set current date
-      setCurrentDate(format(new Date(), "EEEE, MMMM d, yyyy"));
+      // Set current date from prayer times API if available
+      if (timesData && timesData.date) {
+        setCurrentDate(timesData.date);
+      } else {
+        // Fallback to current date
+        setCurrentDate(format(new Date(), "yyyy-MM-dd"));
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Using offline data - API server not available");
       setSchedulerStatusLoading(false);
       setGamaStatusLoading(false);
       
-      // Set current date even if API fails
-      setCurrentDate(format(new Date(), "EEEE, MMMM d, yyyy"));
+      // Fallback to current date
+      setCurrentDate(format(new Date(), "yyyy-MM-dd"));
     } finally {
       setLoading(false);
     }
@@ -266,7 +271,7 @@ const PrayerDashboard = () => {
     <div className="space-y-3 md:space-y-4 max-w-full lg:max-w-7xl mx-auto px-2 md:px-4">
       <Card className="bg-gradient-to-br from-islamic-green to-islamic-blue text-white overflow-hidden mt-2 md:mt-4">
         <CardContent className="p-3 md:p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4 items-center">
             <div className="text-center lg:text-left">
               <h2 className="text-lg md:text-xl font-medium mb-1">Next Prayer</h2>
               {loading && !nextPrayer ? (
@@ -278,7 +283,7 @@ const PrayerDashboard = () => {
             
             <div className="text-center">
               <div className="flex flex-col items-center">
-                <h2 className="text-lg md:text-xl font-medium mb-1">{currentDate}</h2>
+                <h2 className="text-lg md:text-xl font-medium mb-1">Remaining Time</h2>
                 <div className="bg-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3 inline-block min-w-[140px] md:min-w-[180px]">
                   {loading && !countdown ? (
                     <Skeleton className="h-7 md:h-8 w-24 md:w-28 bg-white/20" />
@@ -288,11 +293,12 @@ const PrayerDashboard = () => {
                     </p>
                   )}
                 </div>
+                <p className="text-sm md:text-base mt-1">{currentDate}</p>
               </div>
             </div>
             
             <div className="text-center lg:text-right md:col-span-2 lg:col-span-1">
-              <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
+              <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
                 <div className="flex flex-col items-center lg:items-end space-y-1">
                   <h2 className="text-lg md:text-xl font-medium">Scheduler</h2>
                   <div className="flex items-center gap-2">
@@ -347,14 +353,14 @@ const PrayerDashboard = () => {
           <table className="w-full text-xs sm:text-sm md:text-base">
             <thead>
               <tr className="bg-islamic-beige/50">
-                <th className="px-2 md:px-4 py-3 text-left font-semibold text-islamic-green text-sm md:text-base">Prayer</th>
-                <th className="px-2 md:px-4 py-3 text-left font-semibold text-islamic-green text-sm md:text-base">Time</th>
-                <th className="px-2 md:px-4 py-3 text-center font-semibold text-islamic-green text-sm md:text-base">Azan</th>
-                <th className="px-2 md:px-4 py-3 text-center font-semibold text-islamic-green text-sm md:text-base">
+                <th className="px-2 md:px-4 py-2 text-left font-semibold text-islamic-green text-sm md:text-base">Prayer</th>
+                <th className="px-2 md:px-4 py-2 text-left font-semibold text-islamic-green text-sm md:text-base">Time</th>
+                <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base">Azan</th>
+                <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base">
                   <span className="hidden md:inline">Short Azan</span>
                   <span className="md:hidden">Short</span>
                 </th>
-                <th className="px-2 md:px-4 py-3 text-center font-semibold text-islamic-green text-sm md:text-base">Duaa</th>
+                <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base">Duaa</th>
               </tr>
             </thead>
             <tbody>
