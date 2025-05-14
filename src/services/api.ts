@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 
-// Define base API URL
-const API_BASE_URL = "http://localhost:8000/api"; // Change this to your actual API URL
+// Define base API URL dynamically based on the current host
+const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:8000/api`;
 
 // Types for the API responses
 export interface PrayerTimes {
