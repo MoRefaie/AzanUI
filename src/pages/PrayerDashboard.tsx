@@ -287,34 +287,34 @@ const PrayerDashboard = () => {
         <CardContent className="p-3 md:p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4 items-center">
             <div className="text-center lg:text-left">
-              <h2 className="text-lg md:text-xl font-medium mb-1">Next Prayer</h2>
+              <h2 className="text-lg md:text-xl lg:text-2xl xl:text-3xl font-medium mb-1">Next Prayer</h2>
               {loading && !nextPrayer ? (
                 <Skeleton className="h-8 md:h-9 w-24 md:w-28 bg-white/20 mx-auto lg:mx-0" />
               ) : (
-                <div className="text-xl md:text-3xl font-bold">{nextPrayer || "Loading..."}</div>
+                <div className="text-xl md:text-3xl lg:text-4xl xl:text-5xl font-bold">{nextPrayer || "Loading..."}</div>
               )}
             </div>
             
             <div className="text-center">
               <div className="flex flex-col items-center">
-                <h2 className="text-lg md:text-xl font-medium mb-1">Time Remaining</h2>
+                <h2 className="text-lg md:text-xl lg:text-2xl xl:text-3xl font-medium mb-1">Time Remaining</h2>
                 <div className="bg-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3 inline-block min-w-[140px] md:min-w-[180px]">
                   {loading && !countdown ? (
                     <Skeleton className="h-7 md:h-8 w-24 md:w-28 bg-white/20" />
                   ) : (
-                    <p className="font-mono text-xl md:text-3xl font-bold tabular-nums">
+                    <p className="font-mono text-xl md:text-3xl lg:text-4xl xl:text-5xl font-bold tabular-nums">
                       {countdown || "00:00:00"}
                     </p>
                   )}
                 </div>
-                <p className="text-sm md:text-base mt-1">{formattedDate}</p>
+                <p className="text-sm md:text-base lg:text-lg xl:text-xl mt-1">{formattedDate}</p>
               </div>
             </div>
             
             <div className="text-center lg:text-right md:col-span-2 lg:col-span-1">
               <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
                 <div className="flex flex-col items-center lg:items-end space-y-1">
-                  <h2 className="text-lg md:text-xl font-medium">Scheduler</h2>
+                  <h2 className="text-lg md:text-xl lg:text-2xl font-medium">Scheduler</h2>
                   <div className="flex items-center gap-2">
                     {schedulerStatusLoading ? (
                       <Skeleton className="h-6 w-12 bg-white/20" />
@@ -322,10 +322,10 @@ const PrayerDashboard = () => {
                       <Switch
                         checked={schedulerActive}
                         onCheckedChange={handleSchedulerToggle}
-                        className={`${schedulerActive ? 'bg-green-500' : 'bg-red-500'} data-[state=unchecked]:bg-red-500 scale-75 md:scale-90`}
+                        className={`${schedulerActive ? 'bg-green-500' : 'bg-red-500'} data-[state=unchecked]:bg-red-500 scale-75 md:scale-90 lg:scale-100`}
                       />
                     )}
-                    <span className="font-medium text-sm md:text-base">
+                    <span className="font-medium text-sm md:text-base lg:text-lg xl:text-xl">
                       {schedulerStatusLoading 
                         ? "Loading..." 
                         : schedulerActive 
@@ -336,7 +336,7 @@ const PrayerDashboard = () => {
                 </div>
                 
                 <div className="flex flex-col items-center lg:items-end space-y-1">
-                  <h2 className="text-lg md:text-xl font-medium">Isha Gama</h2>
+                  <h2 className="text-lg md:text-xl lg:text-2xl font-medium">Isha Gama</h2>
                   <div className="flex items-center gap-2">
                     {gamaStatusLoading ? (
                       <Skeleton className="h-6 w-12 bg-white/20" />
@@ -344,10 +344,10 @@ const PrayerDashboard = () => {
                       <Switch
                         checked={gamaActive}
                         onCheckedChange={handleGamaToggle}
-                        className={`${gamaActive ? 'bg-green-500' : 'bg-red-500'} data-[state=unchecked]:bg-red-500 scale-75 md:scale-90`}
+                        className={`${gamaActive ? 'bg-green-500' : 'bg-red-500'} data-[state=unchecked]:bg-red-500 scale-75 md:scale-90 lg:scale-100`}
                       />
                     )}
-                    <span className="font-medium text-sm md:text-base">
+                    <span className="font-medium text-sm md:text-base lg:text-lg xl:text-xl">
                       {gamaStatusLoading 
                         ? "Loading..." 
                         : gamaActive 
@@ -364,17 +364,17 @@ const PrayerDashboard = () => {
 
       <Card className="overflow-hidden border-islamic-green/20 shadow-lg">
         <div className="overflow-x-auto">
-          <table className="w-full text-xs sm:text-sm md:text-base">
+          <table className="w-full text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl">
             <thead>
               <tr className="bg-islamic-beige/50">
-                <th className="px-2 md:px-4 py-2 text-left font-semibold text-islamic-green text-sm md:text-base">Prayer</th>
-                <th className="px-2 md:px-4 py-2 text-left font-semibold text-islamic-green text-sm md:text-base">Time</th>
-                <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base">Azan</th>
-                <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base">
+                <th className="px-2 md:px-4 py-2 text-left font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">Prayer</th>
+                <th className="px-2 md:px-4 py-2 text-left font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">Time</th>
+                <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">Azan</th>
+                <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">
                   <span className="hidden md:inline">Short Azan</span>
                   <span className="md:hidden">Short</span>
                 </th>
-                <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base">Duaa</th>
+                <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">Duaa</th>
               </tr>
             </thead>
             <tbody>

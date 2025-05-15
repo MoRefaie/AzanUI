@@ -1,3 +1,4 @@
+
 import { NavLink } from "react-router-dom";
 import { Clock, Monitor, Settings, ChevronLeft, ChevronRight, Lock, Unlock } from "lucide-react";
 
@@ -35,7 +36,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isLocked }: SidebarProps) => {
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center">
           {isOpen && (
-            <h2 className="font-semibold ml-2 text-sidebar-foreground">
+            <h2 className="font-semibold ml-2 text-sidebar-foreground text-base md:text-lg lg:text-xl">
               Admin Panel
             </h2>
           )}
@@ -76,7 +77,7 @@ const Sidebar = ({ isOpen, toggleSidebar, isLocked }: SidebarProps) => {
           >
             <div className="flex items-center">
               {item.icon}
-              {isOpen && <span className="ml-3">{item.name}</span>}
+              {isOpen && <span className="ml-3 text-sm md:text-base lg:text-lg">{item.name}</span>}
             </div>
           </NavLink>
         ))}
