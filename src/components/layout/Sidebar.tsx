@@ -35,24 +35,17 @@ const Sidebar = ({ isOpen, toggleSidebar, isLocked }: SidebarProps) => {
     >
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center">
-<<<<<<< HEAD
           <h2
             className={`
               sidebar-inline font-semibold ml-2 text-sidebar-foreground
               whitespace-nowrap overflow-hidden
               transition-all duration-300
+              text-base md:text-lg lg:text-xl
               ${isOpen ? "w-32 opacity-100" : "w-0 opacity-0"}
             `}
           >
             Admin Panel
           </h2>
-=======
-          {isOpen && (
-            <h2 className="font-semibold ml-2 text-sidebar-foreground text-base md:text-lg lg:text-xl">
-              Admin Panel
-            </h2>
-          )}
->>>>>>> 9d69a158a30054a65fadbd6e68d5b5419ba85c0d
         </div>
         <button
           onClick={toggleSidebar}
@@ -90,7 +83,6 @@ const Sidebar = ({ isOpen, toggleSidebar, isLocked }: SidebarProps) => {
           >
             <div className="flex items-center">
               {item.icon}
-<<<<<<< HEAD
               <span
                 className={`
                   sidebar-inline
@@ -98,14 +90,12 @@ const Sidebar = ({ isOpen, toggleSidebar, isLocked }: SidebarProps) => {
                   whitespace-nowrap
                   overflow-hidden
                   transition-all duration-300
+                  text-sm md:text-base lg:text-lgs
                   ${isOpen ? "w-32 opacity-100" : "w-0 opacity-0"}
                 `}
               >
                 {item.name}
               </span>
-=======
-              {isOpen && <span className="ml-3 text-sm md:text-base lg:text-lg">{item.name}</span>}
->>>>>>> 9d69a158a30054a65fadbd6e68d5b5419ba85c0d
             </div>
           </NavLink>
         ))}
