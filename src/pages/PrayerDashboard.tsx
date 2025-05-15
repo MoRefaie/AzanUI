@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,6 +40,7 @@ const PrayerDashboard = () => {
   const [gamaStatusLoading, setGamaStatusLoading] = useState<boolean>(true);
   const [currentDate, setCurrentDate] = useState<string>("");
   const [formattedDate, setFormattedDate] = useState<string>("");
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const fetchAllData = async () => {
     setLoading(true);
@@ -197,6 +197,14 @@ const PrayerDashboard = () => {
     }
   };
 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
   const renderPrayerRows = () => {
     if (loading && !prayerTimes) {
       return Array(6).fill(0).map((_, index) => (
@@ -243,39 +251,43 @@ const PrayerDashboard = () => {
           <td className="px-2 md:px-4 py-2 md:py-3 font-mono text-sm md:text-base">
             {time}
           </td>
-          <td className="px-1 md:px-3 py-2 md:py-3">
-            <div className="flex justify-center">
-              <Switch
-                checked={azanSwitches?.[prayer] === "On"}
-                onCheckedChange={() => handleAzanToggle(prayer)}
-                colorScheme="islamic-green"
-                disabled={isIshaWithGama}
-                className="scale-75 md:scale-90"
-              />
-            </div>
-          </td>
-          <td className="px-1 md:px-3 py-2 md:py-3">
-            <div className="flex justify-center">
-              <Switch
-                checked={shortAzanSwitches?.[prayer] === "On"}
-                onCheckedChange={() => handleShortAzanToggle(prayer)}
-                colorScheme="islamic-blue"
-                disabled={isDisabled}
-                className="scale-75 md:scale-90"
-              />
-            </div>
-          </td>
-          <td className="px-1 md:px-3 py-2 md:py-3">
-            <div className="flex justify-center">
-              <Switch
-                checked={duaaSwitches?.[prayer] === "On"}
-                onCheckedChange={() => handleDuaaToggle(prayer)}
-                colorScheme="islamic-gold"
-                disabled={isDisabled}
-                className="scale-75 md:scale-90"
-              />
-            </div>
-          </td>
+          {!isFullscreen && (
+            <>
+              <td className="px-1 md:px-3 py-2 md:py-3">
+                <div className="flex justify-center">
+                  <Switch
+                    checked={azanSwitches?.[prayer] === "On"}
+                    onCheckedChange={() => handleAzanToggle(prayer)}
+                    colorScheme="islamic-green"
+                    disabled={isIshaWithGama}
+                    className="scale-75 md:scale-90"
+                  />
+                </div>
+              </td>
+              <td className="px-1 md:px-3 py-2 md:py-3">
+                <div className="flex justify-center">
+                  <Switch
+                    checked={shortAzanSwitches?.[prayer] === "On"}
+                    onCheckedChange={() => handleShortAzanToggle(prayer)}
+                    colorScheme="islamic-blue"
+                    disabled={isDisabled}
+                    className="scale-75 md:scale-90"
+                  />
+                </div>
+              </td>
+              <td className="px-1 md:px-3 py-2 md:py-3">
+                <div className="flex justify-center">
+                  <Switch
+                    checked={duaaSwitches?.[prayer] === "On"}
+                    onCheckedChange={() => handleDuaaToggle(prayer)}
+                    colorScheme="islamic-gold"
+                    disabled={isDisabled}
+                    className="scale-75 md:scale-90"
+                  />
+                </div>
+              </td>
+            </>
+          )}
         </tr>
       );
     });
@@ -311,53 +323,55 @@ const PrayerDashboard = () => {
               </div>
             </div>
             
-            <div className="text-center lg:text-right md:col-span-2 lg:col-span-1">
-              <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
-                <div className="flex flex-col items-center lg:items-end space-y-1">
-                  <h2 className="text-lg md:text-xl lg:text-2xl font-medium">Scheduler</h2>
-                  <div className="flex items-center gap-2">
-                    {schedulerStatusLoading ? (
-                      <Skeleton className="h-6 w-12 bg-white/20" />
-                    ) : (
-                      <Switch
-                        checked={schedulerActive}
-                        onCheckedChange={handleSchedulerToggle}
-                        className={`${schedulerActive ? 'bg-green-500' : 'bg-red-500'} data-[state=unchecked]:bg-red-500 scale-75 md:scale-90 lg:scale-100`}
-                      />
-                    )}
-                    <span className="font-medium text-sm md:text-base lg:text-lg xl:text-xl">
-                      {schedulerStatusLoading 
-                        ? "Loading..." 
-                        : schedulerActive 
-                          ? "On" 
-                          : "Off"}
-                    </span>
+            {!isFullscreen && (
+              <div className="text-center lg:text-right md:col-span-2 lg:col-span-1">
+                <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
+                  <div className="flex flex-col items-center lg:items-end space-y-1">
+                    <h2 className="text-lg md:text-xl lg:text-2xl font-medium">Scheduler</h2>
+                    <div className="flex items-center gap-2">
+                      {schedulerStatusLoading ? (
+                        <Skeleton className="h-6 w-12 bg-white/20" />
+                      ) : (
+                        <Switch
+                          checked={schedulerActive}
+                          onCheckedChange={handleSchedulerToggle}
+                          className={`${schedulerActive ? 'bg-green-500' : 'bg-red-500'} data-[state=unchecked]:bg-red-500 scale-75 md:scale-90 lg:scale-100`}
+                        />
+                      )}
+                      <span className="font-medium text-sm md:text-base lg:text-lg xl:text-xl">
+                        {schedulerStatusLoading 
+                          ? "Loading..." 
+                          : schedulerActive 
+                            ? "On" 
+                            : "Off"}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="flex flex-col items-center lg:items-end space-y-1">
-                  <h2 className="text-lg md:text-xl lg:text-2xl font-medium">Isha Gama</h2>
-                  <div className="flex items-center gap-2">
-                    {gamaStatusLoading ? (
-                      <Skeleton className="h-6 w-12 bg-white/20" />
-                    ) : (
-                      <Switch
-                        checked={gamaActive}
-                        onCheckedChange={handleGamaToggle}
-                        className={`${gamaActive ? 'bg-green-500' : 'bg-red-500'} data-[state=unchecked]:bg-red-500 scale-75 md:scale-90 lg:scale-100`}
-                      />
-                    )}
-                    <span className="font-medium text-sm md:text-base lg:text-lg xl:text-xl">
-                      {gamaStatusLoading 
-                        ? "Loading..." 
-                        : gamaActive 
-                          ? "On" 
-                          : "Off"}
-                    </span>
+                  
+                  <div className="flex flex-col items-center lg:items-end space-y-1">
+                    <h2 className="text-lg md:text-xl lg:text-2xl font-medium">Isha Gama</h2>
+                    <div className="flex items-center gap-2">
+                      {gamaStatusLoading ? (
+                        <Skeleton className="h-6 w-12 bg-white/20" />
+                      ) : (
+                        <Switch
+                          checked={gamaActive}
+                          onCheckedChange={handleGamaToggle}
+                          className={`${gamaActive ? 'bg-green-500' : 'bg-red-500'} data-[state=unchecked]:bg-red-500 scale-75 md:scale-90 lg:scale-100`}
+                        />
+                      )}
+                      <span className="font-medium text-sm md:text-base lg:text-lg xl:text-xl">
+                        {gamaStatusLoading 
+                          ? "Loading..." 
+                          : gamaActive 
+                            ? "On" 
+                            : "Off"}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -369,12 +383,16 @@ const PrayerDashboard = () => {
               <tr className="bg-islamic-beige/50">
                 <th className="px-2 md:px-4 py-2 text-left font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">Prayer</th>
                 <th className="px-2 md:px-4 py-2 text-left font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">Time</th>
-                <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">Azan</th>
-                <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">
-                  <span className="hidden md:inline">Short Azan</span>
-                  <span className="md:hidden">Short</span>
-                </th>
-                <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">Duaa</th>
+                {!isFullscreen && (
+                  <>
+                    <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">Azan</th>
+                    <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">
+                      <span className="hidden md:inline">Short Azan</span>
+                      <span className="md:hidden">Short</span>
+                    </th>
+                    <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">Duaa</th>
+                  </>
+                )}
               </tr>
             </thead>
             <tbody>

@@ -1,10 +1,10 @@
-
 import { useState, useEffect, useRef } from "react";
 import Sidebar from "./Sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useLocation } from "react-router-dom";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -18,9 +18,14 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const [location, setLocation] = useState<string>("Dublin, Ireland");
   const [isLocked, setIsLocked] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const hoverAreaRef = useRef<HTMLDivElement>(null);
-  
+
+  // Get current route
+  const routerLocation = useLocation();
+  const isPrayerDashboard = routerLocation.pathname === "/" || routerLocation.pathname === "/prayerdashboard";
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
     setIsLocked(!isLocked);
@@ -34,6 +39,49 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       document.documentElement.classList.add('dark');
     }
   };
+
+  // Fullscreen toggle handler
+  const handleFullscreenToggle = () => {
+    if (!isFullscreen) {
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if ((elem as any).webkitRequestFullscreen) {
+        (elem as any).webkitRequestFullscreen();
+      } else if ((elem as any).msRequestFullscreen) {
+        (elem as any).msRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if ((document as any).webkitExitFullscreen) {
+        (document as any).webkitExitFullscreen();
+      } else if ((document as any).msExitFullscreen) {
+        (document as any).msExitFullscreen();
+      }
+    }
+  };
+
+  // Listen for fullscreen change events to update state
+  useEffect(() => {
+    const handleChange = () => {
+      setIsFullscreen(
+        !!(
+          document.fullscreenElement ||
+          (document as any).webkitFullscreenElement ||
+          (document as any).msFullscreenElement
+        )
+      );
+    };
+    document.addEventListener("fullscreenchange", handleChange);
+    document.addEventListener("webkitfullscreenchange", handleChange);
+    document.addEventListener("msfullscreenchange", handleChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleChange);
+      document.removeEventListener("webkitfullscreenchange", handleChange);
+      document.removeEventListener("msfullscreenchange", handleChange);
+    };
+  }, []);
 
   // Handle mouse enter and leave for hover functionality
   const handleMouseEnter = () => {
@@ -68,21 +116,26 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
   return (
     <div className={`min-h-screen flex w-full ${isDarkMode ? 'dark' : ''}`}>
-      <div ref={sidebarRef}>
-        <Sidebar 
-          isOpen={isSidebarOpen} 
-          toggleSidebar={toggleSidebar}
-          isLocked={isLocked}
-        />
-      </div>
+      {/* Hide sidebar if fullscreen and on PrayerDashboard */}
+      {!(isFullscreen && isPrayerDashboard) && (
+        <div ref={sidebarRef}>
+          <Sidebar 
+            isOpen={isSidebarOpen} 
+            toggleSidebar={toggleSidebar}
+            isLocked={isLocked}
+          />
+        </div>
+      )}
       
       {/* Hover area on the left edge of the screen */}
-      <div 
-        ref={hoverAreaRef}
-        className="fixed left-0 top-0 h-full w-4 z-30"
-        onMouseEnter={handleMouseEnter}
-        onTouchStart={isMobile ? handleMouseEnter : undefined}
-      />
+      {!isFullscreen && (
+        <div 
+          ref={hoverAreaRef}
+          className="fixed left-0 top-0 h-full w-4 z-30"
+          onMouseEnter={handleMouseEnter}
+          onTouchStart={isMobile ? handleMouseEnter : undefined}
+        />
+      )}
       
       <div 
         className="flex-1 flex flex-col h-screen overflow-hidden"
@@ -122,6 +175,17 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             <Button variant="ghost" size="icon" onClick={toggleDarkMode} aria-label="Toggle dark mode">
               {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
+            {/* Show fullscreen toggle only on PrayerDashboard */}
+            {isPrayerDashboard && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleFullscreenToggle}
+                aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              >
+                {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
+              </Button>
+            )}
           </div>
         </header>
         <main className="flex-1 overflow-auto islamic-pattern bg-opacity-5 p-2 md:p-3 lg:p-4">
