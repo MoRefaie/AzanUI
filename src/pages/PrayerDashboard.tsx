@@ -232,7 +232,10 @@ const PrayerDashboard = () => {
           className={`border-b border-islamic-green/10 transition-colors
             ${isNext ? 'bg-islamic-beige/30' : 'hover:bg-islamic-beige/20'}`}
         >
-          <td className="px-2 md:px-4 py-2 md:py-3">
+          <td
+            className={`px-2 md:px-4 py-2 md:py-3
+              ${isFullscreen ? "text-2xl md:text-3xl" : "text-sm md:text-base"}`}
+          >
             <div className="flex items-center gap-1 md:gap-2">
               {prayer === "Fajr" && <Moon className="text-islamic-blue" size={16} />}
               {prayer === "Sunrise" && <Sun className="text-islamic-gold" size={16} />}
@@ -240,7 +243,7 @@ const PrayerDashboard = () => {
               {prayer === "Asr" && <Sun className="text-islamic-gold" size={16} />}
               {prayer === "Maghrib" && <Sun className="text-islamic-gold" size={16} />}
               {prayer === "Isha" && <Moon className="text-islamic-blue" size={16} />}
-              <span className={`${isNext ? "font-bold text-islamic-green text-sm md:text-base" : "text-sm md:text-base"}`}>
+              <span className={`${isNext ? "font-bold text-islamic-green" : ""}`}>
                 {prayer}
               </span>
               {isNext && (
@@ -248,7 +251,10 @@ const PrayerDashboard = () => {
               )}
             </div>
           </td>
-          <td className="px-2 md:px-4 py-2 md:py-3 font-mono text-sm md:text-base">
+          <td
+            className={`px-2 md:px-4 py-2 md:py-3 font-mono
+              ${isFullscreen ? "text-2xl md:text-3xl" : "text-sm md:text-base"}`}
+          >
             {time}
           </td>
           {!isFullscreen && (
@@ -381,23 +387,110 @@ const PrayerDashboard = () => {
           <table className="w-full text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl">
             <thead>
               <tr className="bg-islamic-beige/50">
-                <th className="px-2 md:px-4 py-2 text-left font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">Prayer</th>
-                <th className="px-2 md:px-4 py-2 text-left font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">Time</th>
-                {!isFullscreen && (
-                  <>
-                    <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">Azan</th>
-                    <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">
-                      <span className="hidden md:inline">Short Azan</span>
-                      <span className="md:hidden">Short</span>
-                    </th>
-                    <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">Duaa</th>
-                  </>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {renderPrayerRows()}
-            </tbody>
+                <th
+      className={`px-2 md:px-4 py-2 text-left font-semibold text-islamic-green
+        text-sm md:text-base lg:text-lg xl:text-xl
+        ${isFullscreen ? "text-2xl md:text-3xl" : ""}`}
+    >
+      Prayer
+    </th>
+    <th
+      className={`px-2 md:px-4 py-2 text-left font-semibold text-islamic-green
+        text-sm md:text-base lg:text-lg xl:text-xl
+        ${isFullscreen ? "text-2xl md:text-3xl" : ""}`}
+    >
+      Time
+    </th>
+    {!isFullscreen && (
+      <>
+        <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">Azan</th>
+        <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">
+          <span className="hidden md:inline">Short Azan</span>
+          <span className="md:hidden">Short</span>
+        </th>
+        <th className="px-2 md:px-4 py-2 text-center font-semibold text-islamic-green text-sm md:text-base lg:text-lg xl:text-xl">Duaa</th>
+      </>
+    )}
+  </tr>
+</thead>
+<tbody>
+  {Object.entries(prayerTimes ?? {})
+    .filter(([prayer]) => prayer !== 'date')
+    .map(([prayer, time]) => {
+      const isNext = prayer === nextPrayer;
+      const isIshaWithGama = prayer === "Isha" && gamaActive;
+      const isAzanOff = azanSwitches?.[prayer] === "Off";
+      const isDisabled = isAzanOff || isIshaWithGama;
+      
+      return (
+        <tr key={prayer} className={`border-b border-islamic-green/10 transition-colors
+          ${isNext ? 'bg-islamic-beige/30' : 'hover:bg-islamic-beige/20'}`}>
+          <td
+            className={`px-2 md:px-4 py-2 md:py-3
+              ${isFullscreen ? "text-2xl md:text-3xl" : "text-sm md:text-base"}`}
+          >
+            <div className="flex items-center gap-1 md:gap-2">
+              {prayer === "Fajr" && <Moon className="text-islamic-blue" size={16} />}
+              {prayer === "Sunrise" && <Sun className="text-islamic-gold" size={16} />}
+              {prayer === "Dhuhr" && <Sun className="text-islamic-gold" size={16} />}
+              {prayer === "Asr" && <Sun className="text-islamic-gold" size={16} />}
+              {prayer === "Maghrib" && <Sun className="text-islamic-gold" size={16} />}
+              {prayer === "Isha" && <Moon className="text-islamic-blue" size={16} />}
+              <span className={`${isNext ? "font-bold text-islamic-green" : ""}`}>
+                {prayer}
+              </span>
+              {isNext && (
+                <span className="inline-flex h-2 w-2 rounded-full bg-islamic-green animate-pulse" />
+              )}
+            </div>
+          </td>
+          <td
+            className={`px-2 md:px-4 py-2 md:py-3 font-mono
+              ${isFullscreen ? "text-2xl md:text-3xl" : "text-sm md:text-base"}`}
+          >
+            {time}
+          </td>
+          {!isFullscreen && (
+            <>
+              <td className="px-1 md:px-3 py-2 md:py-3">
+                <div className="flex justify-center">
+                  <Switch
+                    checked={azanSwitches?.[prayer] === "On"}
+                    onCheckedChange={() => handleAzanToggle(prayer)}
+                    colorScheme="islamic-green"
+                    disabled={isIshaWithGama}
+                    className="scale-75 md:scale-90"
+                  />
+                </div>
+              </td>
+              <td className="px-1 md:px-3 py-2 md:py-3">
+                <div className="flex justify-center">
+                  <Switch
+                    checked={shortAzanSwitches?.[prayer] === "On"}
+                    onCheckedChange={() => handleShortAzanToggle(prayer)}
+                    colorScheme="islamic-blue"
+                    disabled={isDisabled}
+                    className="scale-75 md:scale-90"
+                  />
+                </div>
+              </td>
+              <td className="px-1 md:px-3 py-2 md:py-3">
+                <div className="flex justify-center">
+                  <Switch
+                    checked={duaaSwitches?.[prayer] === "On"}
+                    onCheckedChange={() => handleDuaaToggle(prayer)}
+                    colorScheme="islamic-gold"
+                    disabled={isDisabled}
+                    className="scale-75 md:scale-90"
+                  />
+                </div>
+              </td>
+            </>
+          )}
+        </tr>
+      );
+    })}
+</tbody>
           </table>
         </div>
       </Card>
