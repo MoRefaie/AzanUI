@@ -8,7 +8,7 @@ RUN apk add --no-cache python3 make g++
 
 # Copy only package files first for better caching
 COPY AzanUIApp/package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy the rest of the app source (including subfolders)
 COPY AzanUIApp/. ./
