@@ -85,7 +85,7 @@
   },
  "pkg": {
   "assets": [
-    "dist/**/*"
+    "AzanUI/dist/**/*"
   ]
 } 
 }
