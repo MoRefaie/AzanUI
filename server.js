@@ -1,9 +1,10 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const bonjour = require('bonjour')();
 
 const PORT = process.env.PORT || 8080;
-const staticPath = path.join(__dirname, 'AzanUI', 'dist');
+const staticPath = path.join(__dirname,'dist');
 
 const mimeTypes = {
   '.html': 'text/html',
@@ -16,6 +17,8 @@ const mimeTypes = {
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon'
 };
+
+bonjour.publish({ name: 'AzanUI', type: 'http', port: PORT, host: 'Azan.local' });
 
 const server = http.createServer((req, res) => {
   let filePath = path.join(staticPath, req.url === '/' ? 'index.html' : req.url);
@@ -32,5 +35,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running at http://Azan.local:${PORT}`);
 });
