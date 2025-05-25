@@ -4,7 +4,10 @@ const path = require('path');
 const bonjour = require('bonjour')();
 
 const PORT = process.env.PORT || 8080;
-const staticPath = path.join(__dirname,'dist');
+const isPkg = typeof process.pkg !== 'undefined';
+const staticPath = isPkg
+  ? path.join(path.dirname(process.execPath), 'dist')
+  : path.join(__dirname, 'dist');
 
 const mimeTypes = {
   '.html': 'text/html',
