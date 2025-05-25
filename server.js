@@ -6,7 +6,7 @@ const bonjour = require('bonjour')();
 const PORT = process.env.PORT || 8080;
 const isPkg = typeof process.pkg !== 'undefined';
 const baseDist = isPkg
-  ? path.join('dist')
+  ? 'dist'
   : path.join(__dirname, 'dist');
 
 const mimeTypes = {
