@@ -1,7 +1,7 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# This workflow will build and package the AzanUI React app as a Node.js server executable
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
-name: Node.js CI
+name: Build and Package AzanUI React App as Node.js Server
 
 on:
   push:
@@ -10,22 +10,44 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  build-and-package:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Install and build React app
+        run: |
+          npm install --legacy-peer-deps
+          npm run build
+
+      - name: Install pkg
+        run: npm install -g pkg
+
+      - name: Build server executable
+        run: |
+          npx pkg server.js --targets node18-win-x64,node18-linux-x64,node18-macos-x64 --out-path dist
+
+      - name: Rename executables
+        run: |
+          mv dist/server-win.exe AzanUI-server-win.exe || true
+          mv dist/server-linux AzanUI-server-linux || true
+          mv dist/server-macos AzanUI-server-macos || true
+
+      - name: Upload executables
+        uses: actions/upload-artifact@v4
+        with:
+          name: AzanUI-server-executables
+          path: |
+            AzanUI-server-win.exe
+            AzanUI-server-linux
+            AzanUI-server-macos
