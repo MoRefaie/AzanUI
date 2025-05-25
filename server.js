@@ -6,7 +6,7 @@ const fs = require("fs");
 const app = express();
 const port = process.env.PORT || 8080;
 
-// Serve static files from the dist directory
+// Serve static files from the dist directory inside the pkg snapshot
 const staticPath = path.join(__dirname, "dist");
 app.use(express.static(staticPath));
 
@@ -31,5 +31,5 @@ console.error = function (...args) {
 };
 
 app.listen(port, "0.0.0.0", () => {
-  console.log(`Server running at http://Azan.local:${PORT}`);
+  console.log(`Server running at http://Azan.local:${port}`);
 });
