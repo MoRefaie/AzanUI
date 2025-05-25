@@ -23,12 +23,10 @@ jobs:
           node-version: 18
 
       - name: Install root dependencies
-        run: npm install
+        run: npm install --legacy-peer-deps
 
-      - name: Install and build React app
-        run: |
-          npm install --legacy-peer-deps
-          npm run build
+      - name: build React app
+        run: npm run build
 
       - name: Install pkg
         run: npm install -g pkg
