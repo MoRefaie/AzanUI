@@ -519,7 +519,7 @@ export async function uploadAudioFile(file: File, fileType: string): Promise<voi
     formData.append('file', file);
     formData.append('fileType', fileType);
     
-    const response = await fetch(`${API_BASE_URL}/upload-audio`, {
+    const response = await fetch(`${API_BASE_URL}/update-audio`, {
       method: 'POST',
       body: formData,
     });
