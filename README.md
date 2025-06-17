@@ -1,73 +1,82 @@
-# Welcome to your Lovable project
+# AzanUI
 
-## Project info
+AzanUI is a modern web user interface for AzanSchedular, built by [Lovable](https://lovable.dev/) using Vite, TypeScript, React, and shadcn-ui. It acts as the front end and dashboard to manage AzanSchedular configurations and settings.
 
-**URL**: https://lovable.dev/projects/86284ba7-1c64-4a4d-82d7-4c815f421abc
+![Build Status](https://img.shields.io/github/actions/workflow/status/MoRefaie/AzanUI/node.js.yml?branch=main)
+![License](https://img.shields.io/github/license/MoRefaie/AzanUI)
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- Fast, modern React UI
+- Built with Vite, TypeScript, Tailwind CSS, and shadcn-ui
+- Connects to AzanSchedular backend API ([AzanSchedular Repo](https://github.com/MoRefaie/AzanSchedular))
+- Responsive design for desktop and mobile
+- Easy configuration and deployment
 
-**Use Lovable**
+## Architecture
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/86284ba7-1c64-4a4d-82d7-4c815f421abc) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
++-------------------+
+|   Azan UI (Web)   |
++-------------------+
+        |
+        v
++-------------------+
+|    FastAPI API    |  <-- [AzanSchedular Backend](https://github.com/MoRefaie/AzanSchedular)
++-------------------+
 ```
 
-**Edit a file directly in GitHub**
+## Quick Start
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+# Clone the repo
+$ git clone https://github.com/MoRefaie/AzanUI.git
+$ cd AzanUI
 
-**Use GitHub Codespaces**
+# Install dependencies
+$ npm install
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Run the development server
+$ npm run dev
+```
 
-## What technologies are used for this project?
+## Configuration
 
-This project is built with:
+- Edit `src/config.ts` or environment variables for API endpoints and settings.
+- For production, build with `npm run build` and serve the static files.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Logs & Media
 
-## How can I deploy this project?
+- Logs are managed by the backend (AzanSchedular).
+- Media files (icons, audio) are in the backend repo.
 
-Simply open [Lovable](https://lovable.dev/projects/86284ba7-1c64-4a4d-82d7-4c815f421abc) and click on Share -> Publish.
+## Tests
 
-## Can I connect a custom domain to my Lovable project?
+- Place your test files in the `tests/` directory at the project root.
+- Run tests with:
+  ```bash
+  npm test
+  ```
 
-Yes, you can!
+## Contributing
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## License
+
+This project is licensed under the MIT License. See [License.txt](License.txt).
+
+## FAQ
+
+- **How do I connect AzanUI to the backend?** Edit the API endpoint in your config or environment variables.
+- **How do I run tests?** `npm test` in the project root.
+
+## Troubleshooting
+
+- Ensure the backend API is running and accessible.
+- Check browser console for errors.
+- Ensure all dependencies are installed and ports are available.
+
+---
+
+For more details, see the code and open an issue if you have questions!
