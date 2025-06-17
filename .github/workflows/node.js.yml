@@ -32,19 +32,31 @@ jobs:
         run: npm install -g pkg
 
       - name: Build server executable
-        run: npx pkg server.js --targets node18-win-x64,node18-linux-x64,node18-macos-x64 --out-path dist
+        run: npx pkg server.js --targets node18-win-x64 --output dist/AzanUI.exe --config package.json
 
-      - name: Rename executables
-        run: |
-          mv dist/server-win.exe AzanUI-server-win.exe || true
-          mv dist/server-linux AzanUI-server-linux || true
-          mv dist/server-macos AzanUI-server-macos || true
-
-      - name: Upload executables
+      - name: Upload EXE as workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AzanUI-server-executables
-          path: |
-            AzanUI-server-win.exe
-            AzanUI-server-linux
-            AzanUI-server-macos
+          name: AzanUI-exe
+          path: dist/AzanUI.exe
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      - name: Upload EXE to Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/AzanUI.exe
+          asset_name: AzanUI.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
