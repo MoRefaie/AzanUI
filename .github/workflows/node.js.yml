@@ -25,6 +25,13 @@ jobs:
       - name: Install root dependencies
         run: npm install --legacy-peer-deps
 
+      - name: Install test dependencies
+        run: |
+          npm install --save-dev vitest @vitest/ui jsdom @testing-library/react @testing-library/jest-dom --legacy-peer-deps
+
+      - name: Run tests
+        run: npm test
+
       - name: build React app
         run: npm run build
 
