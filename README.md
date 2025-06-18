@@ -2,7 +2,7 @@
 
 AzanUI is a modern web user interface for AzanSchedular, built by [Lovable](https://lovable.dev/) using Vite, TypeScript, React, and shadcn-ui. It acts as the front end and dashboard to manage AzanSchedular configurations and settings.
 
-![Build Status](https://img.shields.io/github/actions/workflow/status/MoRefaie/AzanUI/node.js.yml?branch=main)
+![Build Status](https://img.shields.io/github/actions/workflow/status/MoRefaie/AzanUI/build-ui.yml?branch=main)
 ![License](https://img.shields.io/github/license/MoRefaie/AzanUI)
 
 ## Features
