@@ -1,0 +1,80 @@
+name: Build and Package AzanUI React App as Node.js Server
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-package-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install root dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Install test dependencies
+        run: |
+          npm install --save-dev vitest @vitest/ui jsdom @testing-library/react @testing-library/jest-dom @testing-library/dom --legacy-peer-deps
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build React app
+        run: npm run build
+
+      - name: Download portable Node runtime
+        run: |
+          mkdir -p node
+          curl -L https://nodejs.org/dist/v20.11.1/node-v20.11.1-linux-x64.tar.xz -o node.tar.xz
+          tar -xf node.tar.xz
+          mv node-v20.11.1-linux-x64 node
+
+      - name: Prepare Linux package folder
+        run: |
+          mkdir -p azan-ui-linux/ui
+          cp -r dist azan-ui-linux/ui/
+          cp -r node azan-ui-linux/ui/
+          cp server.js azan-ui-linux/ui/
+          cp system.js azan-ui-linux/ui/
+          cp systemConfig.js azan-ui-linux/ui/
+          cp run-ui.sh azan-ui-linux/ui/
+          chmod +x azan-ui-linux/ui/run-ui.sh
+
+      - name: Create Linux tarball
+        run: |
+          tar -czf azan-ui-linux.tar.gz -C azan-ui-linux .
+
+      - name: Upload Linux PKG as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: azan-ui-linux
+          path: azan-ui-linux.tar.gz
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Linux PKG to Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: azan-ui-linux.tar.gz
+          asset_name: azan-ui-linux.tar.gz
+          asset_content_type: application/gzip
