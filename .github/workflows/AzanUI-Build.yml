@@ -1,4 +1,4 @@
-name: Tag + Build + Release
+name: Build + Release
 
 on:
   push:
@@ -9,31 +9,15 @@ permissions:
   contents: write
 
 jobs:
-  tag:
-    runs-on: ubuntu-latest
-    outputs:
-      new_tag: ${{ steps.tag.outputs.new_tag }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Bump version and push tag
-        id: tag
-        uses: mathieudutour/github-tag-action@v6.1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: patch
-
   build_windows:
-    needs: tag
     runs-on: ubuntu-latest
     outputs:
       exe_path: ${{ steps.exe_out.outputs.exe_path }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -67,13 +51,14 @@ jobs:
           path: dist/AzanUI.exe
 
   build_linux:
-    needs: tag
     runs-on: ubuntu-latest
     outputs:
       linux_pkg: ${{ steps.linux_out.outputs.linux_pkg }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -125,16 +110,8 @@ jobs:
   release:
     needs: [build_windows, build_linux]
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Fetch full history including tags
-        run: |
-          git fetch --prune --unshallow || true
-          git fetch origin +refs/tags/*:refs/tags/*
 
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
@@ -149,11 +126,9 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ needs.tag.outputs.new_tag }}
-          name: AzanUI ${{ needs.tag.outputs.new_tag }}
+          tag_name: ${{ github.ref_name }}
+          name: AzanUI ${{ github.ref_name }}
           generate_release_notes: true
           files: |
             AzanUI.exe
             azan-ui-linux.tar.gz
-
-
