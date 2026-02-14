@@ -2,28 +2,13 @@ name: Build + Release
 
 on:
   push:
-    branches:
-      - main
-    # Trigger on any pushed tag so the release job can run when a tag is created/pushed
     tags:
       - '*'
-  # Allow manual runs from the Actions UI
-  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  debug:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print GitHub context
-        run: |
-          echo "github.ref = $GITHUB_REF"
-          echo "github.ref_name = $GITHUB_REF_NAME"
-          echo "github.ref_type = $GITHUB_REF_TYPE"
-          echo "github.event_name = $GITHUB_EVENT_NAME"
-
   build_windows:
     runs-on: ubuntu-latest
     outputs:
@@ -93,34 +78,18 @@ jobs:
       - name: Build React app
         run: npm run build
 
-      - name: Download portable Node runtime
-        run: |
-          mkdir -p node
-          curl -L https://nodejs.org/dist/v20.11.1/node-v20.11.1-linux-x64.tar.xz -o node.tar.xz
-          tar -xf node.tar.xz
-          mv node-v20.11.1-linux-x64 node
+      - name: Install pkg
+        run: npm install -g pkg
 
-      - name: Prepare Linux package folder
-        run: |
-          mkdir -p azan-ui-linux/AzanUI
-          cp -r dist azan-ui-linux/AzanUI/
-          cp -r node azan-ui-linux/AzanUI/
-          cp server.js azan-ui-linux/AzanUI/
-          cp systemConfig.js azan-ui-linux/AzanUI/
-          cp system.json azan-ui-linux/AzanUI/
-          cp run-AzanUI.sh azan-ui-linux/AzanUI/
-          chmod +x azan-ui-linux/AzanUI/run-AzanUI.sh
-
-      - name: Create Linux tarball
-        run: |
-          tar -czf azan-ui-linux.tar.gz -C azan-ui-linux .
+      - name: Build server executable
+        run: npx pkg server.js --targets node18-linux-x64 --output dist/AzanUI --config package.json
 
       - name: Upload Linux PKG as workflow artifact
         id: linux_out
         uses: actions/upload-artifact@v4
         with:
-          name: azan-ui-linux
-          path: azan-ui-linux.tar.gz
+          name: AzanUI-lx
+          path: dist/AzanUI
 
   release:
     needs: [build_windows, build_linux]
@@ -136,7 +105,7 @@ jobs:
       - name: Download Linux artifact
         uses: actions/download-artifact@v4
         with:
-          name: azan-ui-linux
+          name: AzanUI-lx
 
       - name: Move Windows EXE to workspace root
         run: |
@@ -149,10 +118,10 @@ jobs:
 
       - name: Move Linux tarball to workspace root
         run: |
-          if [ -f azan-ui-linux/azan-ui-linux.tar.gz ]; then
-            mv azan-ui-linux/azan-ui-linux.tar.gz azan-ui-linux.tar.gz
+          if [ -f AzanUI-exe/dist/AzanUI ]; then
+            mv AzanUI-exe/dist/AzanUI AzanUI
           else
-            echo "Warning: azan-ui-linux.tar.gz not found at azan-ui-linux/azan-ui-linux.tar.gz"
+            echo "Warning: AzanUI not found at AzanUI-exe/dist/AzanUI"
           fi
 
       - name: Create GitHub Release
@@ -163,4 +132,4 @@ jobs:
           generate_release_notes: true
           files: |
             AzanUI.exe
-            azan-ui-linux.tar.gz
+            AzanUI
