@@ -1,36 +1,34 @@
 const fs = require("fs");
 const path = require("path");
 
+// 1. External config (same as your scheduler)
+const externalConfigPath = path.join(process.cwd(), "config", "system.json");
 
-// Scheduler config path (relative)
-const schedulerConfigPath = path.join(process.cwd(), "config", "system.json");
-
-// UI fallback config
-const basePath = process.pkg ? path.dirname(process.execPath) : __dirname;
-const fallbackConfigPath = path.join(basePath, "system.json");
+// 2. Embedded config (inside pkg virtual filesystem)
+const embeddedConfigPath = path.join(__dirname, "system.json");
 
 function loadConfig() {
-  // 1. Try scheduler config
-  try {
-    if (fs.existsSync(schedulerConfigPath)) {
-      const raw = fs.readFileSync(schedulerConfigPath, "utf8");
+  // Try external config first
+  if (fs.existsSync(externalConfigPath)) {
+    try {
       console.log("Loaded system.json from Config folder");
-      return JSON.parse(raw);
+      return JSON.parse(fs.readFileSync(externalConfigPath, "utf8"));
+    } catch (err) {
+      console.error("Failed to load external system.json:", err);
     }
-  } catch (err) {
-    console.error("Failed to load system.json from Config folder:", err);
+  } else {
+    console.warn("No external system.json found in Config folder");
   }
 
-  // 2. Try fallback system.js
+  // Try embedded config (pkg asset)
   try {
-    console.log("Loaded fallback system.js from UI");
-    const raw = fs.readFileSync(fallbackConfigPath, "utf8"); 
-    return JSON.parse(raw);
+    console.log("Loaded embedded system.json from pkg assets");
+    return JSON.parse(fs.readFileSync(embeddedConfigPath, "utf8"));
   } catch (err) {
-    console.error("Failed to load fallback system.js:", err);
+    console.error("Failed to load embedded system.json:", err);
   }
 
-  // 3. Final fallback
+  // Final fallback
   console.error("No config found. Using hardcoded defaults.");
   return {
     CONSOLE_LOGGING: "On",
