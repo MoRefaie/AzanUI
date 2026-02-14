@@ -141,6 +141,7 @@ jobs:
         with:
           tag_name: ${{ needs.tag.outputs.new_tag }}
           name: AzanUI ${{ needs.tag.outputs.new_tag }}
+          generate_release_notes: true
           files: |
             AzanUI.exe
             azan-ui-linux.tar.gz
