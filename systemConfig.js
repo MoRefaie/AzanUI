@@ -1,25 +1,24 @@
 const fs = require("fs");
 const path = require("path");
 
-// UI directory
-const uiDir = __dirname;
 
 // Scheduler config path (relative)
-const schedulerConfigPath = path.join(uiDir, "..", "config", "system.json");
+const schedulerConfigPath = path.join(process.cwd(), "config", "system.json");
 
 // UI fallback config
-const fallbackConfigPath = path.join(uiDir, "system.json");
+const basePath = process.pkg ? path.dirname(process.execPath) : __dirname;
+const fallbackConfigPath = path.join(basePath, "system.json");
 
 function loadConfig() {
   // 1. Try scheduler config
   try {
     if (fs.existsSync(schedulerConfigPath)) {
       const raw = fs.readFileSync(schedulerConfigPath, "utf8");
-      console.log("Loaded system.json from scheduler");
+      console.log("Loaded system.json from Config folder");
       return JSON.parse(raw);
     }
   } catch (err) {
-    console.error("Failed to load scheduler system.json:", err);
+    console.error("Failed to load system.json from Config folder:", err);
   }
 
   // 2. Try fallback system.js

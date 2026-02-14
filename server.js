@@ -50,9 +50,6 @@ const config = require("./systemConfig");
 const UI_PORT = parseInt(config.UI_PORT, 10) || 8080;
 const ENABLE_BONJOUR = config.BONJOUR === "On";
 
-// Scheduler URL (if you need it later)
-const SCHEDULER_URL = `http://${config.API_HOST}:${config.API_PORT}`;
-
 // ---------------------------------------------------------
 // 3. EXPRESS SETUP
 // ---------------------------------------------------------

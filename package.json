@@ -97,7 +97,8 @@
   },
   "pkg": {
     "assets": [
-      "dist/**/*"
+      "dist/**/*", 
+      "system.json"
     ]
   }
 }

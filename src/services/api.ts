@@ -88,7 +88,7 @@ export async function getPrayerTimes(): Promise<PrayerTimes> {
 
     // Return mock data for development
     return {
-      "date": "2023-10-01",
+      "date": "2025-01-01",
       "Fajr": "04:46",
       "Sunrise": "06:27",
       "Dhuhr": "13:27",
@@ -135,7 +135,7 @@ export async function getConfig(keys: string[]): Promise<ConfigData> {
       "SHORT_AZAN_FILE": "Short_Azan.mp3",
       "FAJR_AZAN_FILE": "Fajr_Azan.mp3",
       "REGULAR_AZAN_FILE": "Regular_Azan.mp3",
-      "DEVICES": ["024203835863"],
+      "DEVICES": ["xxxxxxxxxxxx"],
       "AZAN_SWITCHES": {
         "Fajr": "On",
         "Sunrise": "On",
@@ -446,12 +446,12 @@ export async function scanDevices(): Promise<DeviceResponse> {
         "status": "success",
         "devices": [
           {
-            "name": "Nemo's MacBook Pro",
-            "address": "10.10.1.108",
-            "mac": "BA:80:EA:44:D7:10",
-            "identifier": "BA80EA44D710",
+            "name": "Dummy Device",
+            "address": "y.y.y.y",
+            "mac": "yy:yy:yy:yy:yy:yy",
+            "identifier": "yyyyyyyyyyyy",
             "deep_sleep": false,
-            "device_info": "MacBookPro18,3, MacOS",
+            "device_info": "Dummy Device, MacOS",
             "ready": true,
             "services": [
               {
@@ -473,12 +473,12 @@ export async function scanDevices(): Promise<DeviceResponse> {
             ]
           },
           {
-            "name": "Nemo's HomePod",
-            "address": "10.10.1.102",
-            "mac": "02:42:03:83:58:63",
-            "identifier": "024203835863",
+            "name": "Dummy HomePod",
+            "address": "x.x.x.x",
+            "mac": "xx:xx:xx:xx:xx:xx",
+            "identifier": "xxxxxxxxxxxx",
             "deep_sleep": false,
-            "device_info": "HomePod Mini, tvOS 18.4",
+            "device_info": "Dummy HomePod Mini, tvOS xx.x",
             "ready": true,
             "services": [
               {
