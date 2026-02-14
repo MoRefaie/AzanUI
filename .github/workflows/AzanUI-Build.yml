@@ -131,8 +131,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Fetch tags
-        run: git fetch --tags
+      - name: Fetch full history including tags
+        run: |
+          git fetch --prune --unshallow || true
+          git fetch origin +refs/tags/*:refs/tags/*
 
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
@@ -153,4 +155,5 @@ jobs:
           files: |
             AzanUI.exe
             azan-ui-linux.tar.gz
+
 
