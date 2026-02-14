@@ -14,6 +14,16 @@ permissions:
   contents: write
 
 jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print GitHub context
+        run: |
+          echo "github.ref = $GITHUB_REF"
+          echo "github.ref_name = $GITHUB_REF_NAME"
+          echo "github.ref_type = $GITHUB_REF_TYPE"
+          echo "github.event_name = $GITHUB_EVENT_NAME"
+
   build_windows:
     runs-on: ubuntu-latest
     outputs:
