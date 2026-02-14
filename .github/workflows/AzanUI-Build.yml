@@ -126,6 +126,11 @@ jobs:
     needs: [build_windows, build_linux]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
@@ -145,3 +150,4 @@ jobs:
           files: |
             AzanUI.exe
             azan-ui-linux.tar.gz
+
