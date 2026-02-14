@@ -8,7 +8,7 @@ const uiDir = __dirname;
 const schedulerConfigPath = path.join(uiDir, "..", "config", "system.json");
 
 // UI fallback config
-const fallbackConfigPath = path.join(uiDir, "system.js");
+const fallbackConfigPath = path.join(uiDir, "system.json");
 
 function loadConfig() {
   // 1. Try scheduler config
@@ -25,7 +25,8 @@ function loadConfig() {
   // 2. Try fallback system.js
   try {
     console.log("Loaded fallback system.js from UI");
-    return require(fallbackConfigPath);
+    const raw = fs.readFileSync(fallbackConfigPath, "utf8"); 
+    return JSON.parse(raw);
   } catch (err) {
     console.error("Failed to load fallback system.js:", err);
   }

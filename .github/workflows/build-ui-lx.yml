@@ -41,14 +41,14 @@ jobs:
 
       - name: Prepare Linux package folder
         run: |
-          mkdir -p azan-ui-linux/ui
-          cp -r dist azan-ui-linux/ui/
-          cp -r node azan-ui-linux/ui/
-          cp server.js azan-ui-linux/ui/
-          cp system.js azan-ui-linux/ui/
-          cp systemConfig.js azan-ui-linux/ui/
-          cp run-ui.sh azan-ui-linux/ui/
-          chmod +x azan-ui-linux/ui/run-ui.sh
+          mkdir -p azan-ui-linux/AzanUI
+          cp -r dist azan-ui-linux/AzanUI/
+          cp -r node azan-ui-linux/AzanUI/
+          cp server.js azan-ui-linux/AzanUI/
+          cp systemConfig.js azan-ui-linux/AzanUI/
+          cp system.json azan-ui-linux/AzanUI/
+          cp run-AzanUI.sh azan-ui-linux/AzanUI/
+          chmod +x azan-ui-linux/AzanUI/run-AzanUI.sh
 
       - name: Create Linux tarball
         run: |
