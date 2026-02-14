@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+    # Trigger on any pushed tag so the release job can run when a tag is created/pushed
+    tags:
+      - '*'
+  # Allow manual runs from the Actions UI
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -122,6 +127,23 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: azan-ui-linux
+
+      - name: Move Windows EXE to workspace root
+        run: |
+          # downloaded contents are placed under AzanUI-exe/, original path retained
+          if [ -f AzanUI-exe/dist/AzanUI.exe ]; then
+            mv AzanUI-exe/dist/AzanUI.exe AzanUI.exe
+          else
+            echo "Warning: AzanUI.exe not found at AzanUI-exe/dist/AzanUI.exe"
+          fi
+
+      - name: Move Linux tarball to workspace root
+        run: |
+          if [ -f azan-ui-linux/azan-ui-linux.tar.gz ]; then
+            mv azan-ui-linux/azan-ui-linux.tar.gz azan-ui-linux.tar.gz
+          else
+            echo "Warning: azan-ui-linux.tar.gz not found at azan-ui-linux/azan-ui-linux.tar.gz"
+          fi
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
