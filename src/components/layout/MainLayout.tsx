@@ -5,6 +5,7 @@ import { Moon, Sun, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLocation } from "react-router-dom";
+import { getConfig } from "@/services/api"; // added for default timetable
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -22,9 +23,27 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const hoverAreaRef = useRef<HTMLDivElement>(null);
 
+  // configuration state
+  const [defaultTimetable, setDefaultTimetable] = useState<string>("");
+
   // Get current route
   const routerLocation = useLocation();
   const isPrayerDashboard = routerLocation.pathname === "/" || routerLocation.pathname === "/prayerdashboard";
+
+  // fetch default timetable once
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const cfg = await getConfig(["DEFAULT_TIMETABLE"]);
+        if (cfg && cfg.DEFAULT_TIMETABLE) {
+          setDefaultTimetable(cfg.DEFAULT_TIMETABLE);
+        }
+      } catch (e) {
+        console.error("Failed to load config in MainLayout", e);
+      }
+    };
+    fetchConfig();
+  }, []);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -163,8 +182,13 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           </button>
           
           <div className="flex flex-col items-center flex-grow">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-islamic-green dark:text-islamic-green-light tracking-wide">
+            <h1 className="relative text-2xl sm:text-3xl md:text-4xl font-bold text-islamic-green dark:text-islamic-green-light tracking-wide">
               Prayer Times
+              {defaultTimetable && defaultTimetable.toLowerCase() !== "default" && (
+                <span className="absolute left-full top-0 ml-2 text-lg font-bold text-islamic-green-light">
+                  ({defaultTimetable})
+                </span>
+              )}
             </h1>
             <p className="text-lg sm:text-xl md:text-2xl text-islamic-blue/90 font-medium">
               {location}

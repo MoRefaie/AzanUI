@@ -249,14 +249,16 @@ const Configuration = () => {
                         >
                           {config.DEFAULT_TIMETABLE === key ? "Default" : "Set as Default"}
                         </Button>
-                        <Button 
-                          size="sm" 
-                          variant="destructive" 
-                          type="button"
-                          onClick={() => handleRemoveSource(key)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {key.toLowerCase() !== "default" && (
+                          <Button 
+                            size="sm" 
+                            variant="destructive" 
+                            type="button"
+                            onClick={() => handleRemoveSource(key)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))}

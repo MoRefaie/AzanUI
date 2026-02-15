@@ -126,10 +126,11 @@ export async function getConfig(keys: string[]): Promise<ConfigData> {
     // Return mock data for development
     return {
       "SOURCES": {
-        "icci": "https://islamireland.ie/api/timetable/",
-        "naas": "https://mawaqit.net/en/m/-34"
+        "Default": "--",
+        "ICCI": "https://islamireland.ie/api/timetable/",
+        "NAAS": "https://mawaqit.net/en/m/-34"
       },
-      "DEFAULT_TIMETABLE": "icci",
+      "DEFAULT_TIMETABLE": "Default",
       "TIMEZONE": "Europe/Dublin",
       "AUDIO_VOLUME": "40.0",
       "SHORT_AZAN_FILE": "Short_Azan.mp3",
