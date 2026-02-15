@@ -30,19 +30,30 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const routerLocation = useLocation();
   const isPrayerDashboard = routerLocation.pathname === "/" || routerLocation.pathname === "/prayerdashboard";
 
-  // fetch default timetable once
-  useEffect(() => {
-    const fetchConfig = async () => {
-      try {
-        const cfg = await getConfig(["DEFAULT_TIMETABLE"]);
-        if (cfg && cfg.DEFAULT_TIMETABLE) {
-          setDefaultTimetable(cfg.DEFAULT_TIMETABLE);
-        }
-      } catch (e) {
-        console.error("Failed to load config in MainLayout", e);
+  // fetch default timetable once and when configuration changes
+  const fetchDefaultTimetable = async () => {
+    try {
+      const cfg = await getConfig(["DEFAULT_TIMETABLE"]);
+      if (cfg && cfg.DEFAULT_TIMETABLE) {
+        setDefaultTimetable(cfg.DEFAULT_TIMETABLE);
       }
+    } catch (e) {
+      console.error("Failed to load config in MainLayout", e);
+    }
+  };
+
+  useEffect(() => {
+    fetchDefaultTimetable();
+
+    // listen for global config updates so the timetable label can update
+    const handleConfigUpdate = () => {
+      fetchDefaultTimetable();
     };
-    fetchConfig();
+
+    window.addEventListener("configUpdated", handleConfigUpdate);
+    return () => {
+      window.removeEventListener("configUpdated", handleConfigUpdate);
+    };
   }, []);
 
   const toggleSidebar = () => {

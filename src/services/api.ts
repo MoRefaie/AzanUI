@@ -184,10 +184,14 @@ export async function updateConfig(updates: Partial<ConfigData>, returnOutput: b
 
     if (returnOutput) {
       // If the switch is "on", return the output
+      // also notify listeners that configuration changed so UI can refresh
+      window.dispatchEvent(new Event("configUpdated"));
       return jsonResponse;
     } else {
       // If the switch is "off", display a toast notification
       toast.success("Configuration updated successfully");
+      // fire a global event so components can react to the change
+      window.dispatchEvent(new Event("configUpdated"));
     }
   } catch (error) {
     if (returnOutput) {

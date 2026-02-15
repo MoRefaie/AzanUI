@@ -30,7 +30,7 @@ const Configuration = () => {
     const fetchConfig = async () => {
       setLoading(true);
       try {
-        const configData = await getConfig(["TIMEZONE", "SOURCES", "DEFAULT_TIMETABLE", "SHORT_AZAN_FILE", "FAJR_AZAN_FILE", "REGULAR_AZAN_FILE"]);
+        const configData = await getConfig(["TIMEZONE", "SOURCES", "DEFAULT_TIMETABLE"]);
         setConfig(configData);
       } catch (error) {
         console.error("Error fetching configuration:", error);
