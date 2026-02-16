@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import MainLayout from '../src/components/layout/MainLayout';
 import * as api from '../src/services/api';
 import { vi } from 'vitest';
@@ -14,9 +15,11 @@ describe('MainLayout', () => {
     // initial call returns "Initial"
     (api.getConfig as any).mockResolvedValueOnce({ DEFAULT_TIMETABLE: 'Initial' });
     render(
-      <MainLayout>
-        <div>Child</div>
-      </MainLayout>
+      <MemoryRouter>
+        <MainLayout>
+          <div>Child</div>
+        </MainLayout>
+      </MemoryRouter>
     );
 
     // wait for initial timetable to render

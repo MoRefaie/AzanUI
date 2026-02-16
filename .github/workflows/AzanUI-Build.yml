@@ -9,10 +9,9 @@ permissions:
   contents: write
 
 jobs:
-  build_windows:
+  quality_check:
     runs-on: ubuntu-latest
-    outputs:
-      exe_path: ${{ steps.exe_out.outputs.exe_path }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,15 +23,45 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install root dependencies
+      - name: Install dependencies
         run: npm install --legacy-peer-deps
 
       - name: Install test dependencies
         run: |
           npm install --save-dev vitest @vitest/ui jsdom @testing-library/react @testing-library/jest-dom @testing-library/dom --legacy-peer-deps
 
+      - name: Lint with ESLint
+        run: |
+          npm install --save-dev eslint --legacy-peer-deps
+          npx eslint tests --ext .ts,.tsx --rule "@typescript-eslint/no-explicit-any: off"
+
+      - name: Type check with TypeScript
+        run: |
+          npm install --save-dev typescript --legacy-peer-deps
+          npx tsc --noEmit
+
       - name: Run tests
         run: npm test
+
+  build_windows:
+    needs: quality_check
+    runs-on: ubuntu-latest
+    outputs:
+      exe_path: ${{ steps.exe_out.outputs.exe_path }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
 
       - name: Build React app
         run: npm run build
@@ -40,10 +69,10 @@ jobs:
       - name: Install pkg
         run: npm install -g pkg
 
-      - name: Build server executable
+      - name: Build Windows executable
         run: npx pkg server.js --targets node18-win-x64 --output dist/AzanUI.exe --config package.json
 
-      - name: Upload EXE as workflow artifact
+      - name: Upload Windows EXE
         id: exe_out
         uses: actions/upload-artifact@v4
         with:
@@ -51,9 +80,11 @@ jobs:
           path: dist/AzanUI.exe
 
   build_linux:
+    needs: quality_check
     runs-on: ubuntu-latest
     outputs:
       linux_pkg: ${{ steps.linux_out.outputs.linux_pkg }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -65,15 +96,8 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install root dependencies
+      - name: Install dependencies
         run: npm install --legacy-peer-deps
-
-      - name: Install test dependencies
-        run: |
-          npm install --save-dev vitest @vitest/ui jsdom @testing-library/react @testing-library/jest-dom @testing-library/dom --legacy-peer-deps
-
-      - name: Run tests
-        run: npm test
 
       - name: Build React app
         run: npm run build
@@ -81,10 +105,10 @@ jobs:
       - name: Install pkg
         run: npm install -g pkg
 
-      - name: Build server executable
+      - name: Build Linux executable
         run: npx pkg server.js --targets node18-linux-x64 --output dist/AzanUI --config package.json
 
-      - name: Upload Linux PKG as workflow artifact
+      - name: Upload Linux binary
         id: linux_out
         uses: actions/upload-artifact@v4
         with:
@@ -95,8 +119,8 @@ jobs:
     needs: [build_windows, build_linux]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
-    steps:
 
+    steps:
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
