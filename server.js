@@ -88,6 +88,6 @@ if (ENABLE_BONJOUR) {
 // 5. START SERVER
 // ---------------------------------------------------------
 
-app.listen(UI_PORT, "0.0.0.0", () => {
+app.listen(UI_PORT, "::", () => {
   console.log(`Server running at http://${config.UI_HOST}:${UI_PORT}`);
 });

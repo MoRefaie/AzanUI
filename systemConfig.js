@@ -32,7 +32,7 @@ function loadConfig() {
   console.error("No config found. Using hardcoded defaults.");
   return {
     CONSOLE_LOGGING: "On",
-    API_HOST: "0.0.0.0",
+    API_HOST: "::",
     API_PORT: 8000,
     UI_HOST: "Azan.local",
     UI_PORT: 8080,
