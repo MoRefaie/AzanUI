@@ -1,4 +1,4 @@
-name: Build + Release
+name: Build + Release AzanUI
 
 on:
   push:
@@ -47,7 +47,7 @@ jobs:
         id: exe_out
         uses: actions/upload-artifact@v4
         with:
-          name: AzanUI-exe
+          name: AzanUI-win
           path: dist/AzanUI.exe
 
   build_linux:
@@ -88,7 +88,7 @@ jobs:
         id: linux_out
         uses: actions/upload-artifact@v4
         with:
-          name: AzanUI-lx
+          name: AzanUI-linux
           path: dist/AzanUI
 
   release:
@@ -100,28 +100,28 @@ jobs:
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
-          name: AzanUI-exe
+          name: AzanUI-win
 
       - name: Download Linux artifact
         uses: actions/download-artifact@v4
         with:
-          name: AzanUI-lx
+          name: AzanUI-linux
 
       - name: Move Windows EXE to workspace root
         run: |
-          # downloaded contents are placed under AzanUI-exe/, original path retained
-          if [ -f AzanUI-exe/dist/AzanUI.exe ]; then
-            mv AzanUI-exe/dist/AzanUI.exe AzanUI.exe
+          # downloaded contents are placed under AzanUI-win/, original path retained
+          if [ -f AzanUI-win/dist/AzanUI.exe ]; then
+            mv AzanUI-win/dist/AzanUI.exe AzanUI.exe
           else
-            echo "Warning: AzanUI.exe not found at AzanUI-exe/dist/AzanUI.exe"
+            echo "Warning: AzanUI.exe not found at AzanUI-win/dist/AzanUI.exe"
           fi
 
       - name: Move Linux tarball to workspace root
         run: |
-          if [ -f AzanUI-exe/dist/AzanUI ]; then
-            mv AzanUI-exe/dist/AzanUI AzanUI
+          if [ -f AzanUI-linux/dist/AzanUI ]; then
+            mv AzanUI-linux/dist/AzanUI AzanUI
           else
-            echo "Warning: AzanUI not found at AzanUI-exe/dist/AzanUI"
+            echo "Warning: AzanUI not found at AzanUI-linux/dist/AzanUI"
           fi
 
       - name: Create GitHub Release
