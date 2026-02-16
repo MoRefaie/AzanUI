@@ -1,6 +1,6 @@
 # AzanUI
 
-AzanUI is a modern web user interface for AzanSchedular, built by [Lovable](https://lovable.dev/) using Vite, TypeScript, React, and shadcn-ui. It acts as the front end and dashboard to manage AzanSchedular configurations and settings.
+AzanUI is a modern web user interface for AzanScheduler, built by [Lovable](https://lovable.dev/) using Vite, TypeScript, React, and shadcn-ui. It acts as the front end and dashboard to manage AzanScheduler configurations and settings.
 
 ![Build Status](https://img.shields.io/github/actions/workflow/status/MoRefaie/AzanUI/build-ui.yml?branch=main)
 ![License](https://img.shields.io/github/license/MoRefaie/AzanUI)
@@ -9,7 +9,7 @@ AzanUI is a modern web user interface for AzanSchedular, built by [Lovable](http
 
 - Fast, modern React UI
 - Built with Vite, TypeScript, Tailwind CSS, and shadcn-ui
-- Connects to AzanSchedular backend API ([AzanSchedular Repo](https://github.com/MoRefaie/AzanSchedular))
+- Connects to AzanScheduler backend API ([AzanScheduler Repo](https://github.com/MoRefaie/AzanScheduler))
 - Responsive design for desktop and mobile
 - Easy configuration and deployment
 
@@ -22,7 +22,7 @@ AzanUI is a modern web user interface for AzanSchedular, built by [Lovable](http
         |
         v
 +-------------------+
-|    FastAPI API    |  <-- [AzanSchedular Backend](https://github.com/MoRefaie/AzanSchedular)
+|    FastAPI API    |  <-- [AzanScheduler Backend](https://github.com/MoRefaie/AzanScheduler)
 +-------------------+
 ```
 
@@ -47,7 +47,7 @@ $ npm run dev
 
 ## Logs & Media
 
-- Logs are managed by the backend (AzanSchedular).
+- Logs are managed by the backend (AzanScheduler).
 - Media files (icons, audio) are in the backend repo.
 
 ## Tests
